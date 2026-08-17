@@ -1,10 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, NavLink, Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { AuthGuard } from './components/AuthGuard'
-import AHPPage from './pages/AHPPage'
 import AboutPage from './pages/AboutPage'
-// import HomePage from './pages/HomePage'
-import LinearWeightingPage from './pages/LinearWeightingPage'
 import VotePage from './pages/VotePage'
 import SuggestPage from './pages/SuggestPage'
 import PolygonMapPage from './pages/PolygonMapPage'
@@ -111,8 +108,6 @@ function AppShell() {
         <Route path="/parking-vote" element={<AuthGuard><ParkingVotePage /></AuthGuard>} />
         <Route path="/polygon-map" element={<AuthGuard><PolygonMapPage /></AuthGuard>} />
         <Route path="/profile" element={<AuthGuard><ProfilePage /></AuthGuard>} />
-        <Route path="/ahp" element={<AuthGuard><AHPPage /></AuthGuard>} />
-        <Route path="/linear" element={<AuthGuard><LinearWeightingPage /></AuthGuard>} />
       </Routes>
       </div>
       <ParkletExplainer />
