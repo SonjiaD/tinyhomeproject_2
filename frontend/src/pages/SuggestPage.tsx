@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
+import { fetchSuggestions, submitSuggestion } from '../lib/api'
 import { MapContainer, TileLayer, CircleMarker, Tooltip, useMapEvents } from 'react-leaflet'
 
 interface Suggestion {
   id: string
   lat: number
   lng: number
-  name: string | null
-  occupation: string | null
+  /** Submitter PII, deliberately absent from anything fetched. The public read goes through
+   *  the suggestions_public view, which omits these exactly as GET /api/suggestions did — so
+   *  they are only ever populated on the row appended locally right after you submit. */
+  name?: string | null
+  occupation?: string | null
   reason: string | null
   created_at: string
 }
@@ -51,9 +54,8 @@ export default function SuggestPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    axios
-      .get(`${import.meta.env.VITE_API_URL}/api/suggestions`)
-      .then(res => setSuggestions(res.data))
+    fetchSuggestions()
+      .then(rows => setSuggestions(rows))
       .catch(() => {
         // Non-fatal — map is still usable without existing suggestions
         setLoadError(true)
@@ -103,7 +105,7 @@ export default function SuggestPage() {
     setSubmitting(true)
     setError(null)
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/suggestions`, {
+      await submitSuggestion({
         lat: pendingLatLng.lat,
         lng: pendingLatLng.lng,
         name: name.trim() || null,
@@ -169,7 +171,7 @@ export default function SuggestPage() {
               <div>
                 <p className="text-sm font-semibold text-gray-800">Loading map…</p>
                 <p className="text-xs text-gray-500 mt-1 max-w-xs">
-                  The server may be waking up. This can take up to 30 seconds. Thanks for your patience!
+                  Just a moment while we fetch existing suggestions.
                 </p>
               </div>
             </div>

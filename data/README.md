@@ -1,6 +1,6 @@
 # data/
 
-Committed data files used by the backend and data pipeline.
+Committed data files used by the data pipeline and the website.
 
 ---
 
@@ -24,12 +24,11 @@ Committed data files used by the backend and data pipeline.
 - Updated by running `data_pipeline/scripts/merge_data.py` after a new scrape, or
   `add_manual_points.py` when patching a specific known gap.
 
-**Used by:** `backend/app.py` loads this at startup for the ranking/scoring API endpoints:
-- `/api/ahp` — AHP pairwise comparison ranking
-- `/api/wsm` — linear weighting ranking
-- `/api/default_map` — default map with candidate dots
+**Used by:** `generate_parking_polygons.py`, as the block-level candidate input that per-spot
+rectangles are generated from.
 
-> The backend requires this file to start up even if the ranking pages are not actively shown to users. If it is missing, the server crashes on boot.
+> Previously also loaded at startup by the Flask backend to serve the AHP/WSM ranking
+> endpoints. Those endpoints were removed in `62273ab`, and the backend itself is gone.
 
 ---
 
@@ -58,7 +57,12 @@ parent candidate/block. `water_infrastructure_dist` and `homeless_service_dist` 
 come from the block-level candidate (no OSM equivalent exists to recompute them more
 precisely).
 
-**Used by:** `backend/app.py` serves this via `/api/polygon_map`. The frontend fetches that endpoint to draw the parking rectangles on the map.
+**Used by:** `export_polygons_for_web.py`, which rounds it for transfer and writes
+`frontend/src/assets/parking_polygons.json`. Vite fingerprints that asset and Netlify's CDN
+serves it, so the map arrives with no server involved.
+
+> This used to be served by the Flask backend via `/api/polygon_map`. Loading 52 MB at
+> startup was what made the free-tier cold boot slow enough to be visible to every visitor.
 
 ### Versioning
 
@@ -140,7 +144,9 @@ data/polygons/parking_polygons_latest.geojson
         +  data/features/*.geojson  (live OSM/Overpass, full-city, periodic refresh)
         ↓  fetch_osm_features.py  →  compute_spot_distances.py
 data/polygons/parking_polygons_latest.geojson  (transit_dist/city_facility_dist now per-spot-accurate)
-        ↓  backend /api/polygon_map
+        ↓  export_polygons_for_web.py  (rounds coordinates, ~2.7 MB gzipped)
+frontend/src/assets/parking_polygons.json  →  Netlify CDN
+        ↓
 frontend map (the colored parking rectangles you see on the site)
         ↓  sync_sites_to_supabase.py
 Supabase `sites` table (so each vote can be joined to its spot's location + amenities)

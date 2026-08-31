@@ -72,7 +72,7 @@ Two views join these for analysis: `vote_research_view` (one row per vote, every
 
 **How to analyze:** run `export_research_data.py` to get the CSVs, then pivot / `groupby` offline in Excel / pandas / R. Export the master `votes_research.csv` once and derive rankings, demographic breakdowns, and amenity correlations from it — no need to hand-write SQL per question. Any custom question is still reachable by querying the interconnected tables directly (the views are just saved shortcuts for the common ones).
 
-**Service role key:** `sync_sites_to_supabase.py` and `export_research_data.py` both need `SUPABASE_SERVICE_ROLE_KEY` in `backend/.env` (Supabase dashboard → Settings → API → `service_role` secret) — the sites table's RLS blocks writes from the anon key, and the profiles table's RLS blocks reading other users' rows. This key is admin-only; never expose it in the frontend.
+**Service role key:** `sync_sites_to_supabase.py` and `export_research_data.py` both need `SUPABASE_SERVICE_ROLE_KEY` in `.env` at the repo root (Supabase dashboard → Settings → API → `service_role` secret) — the sites table's RLS blocks writes from the anon key, and the profiles table's RLS blocks reading other users' rows. This key is admin-only; never expose it in the frontend.
 
 ## output/
 

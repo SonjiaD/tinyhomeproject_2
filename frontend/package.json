@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.106.0",
-    "axios": "^1.6.0",
     "canvas-confetti": "^1.9.4",
     "framer-motion": "^12.39.0",
     "leaflet": "^1.9.4",

@@ -1,0 +1,20 @@
+script: export_polygons_for_web
+generated_at: '2026-08-31T05:19:42.749960+00:00'
+source: data/polygons/parking_polygons_latest.geojson
+spots:
+  total: 46970
+  features: 46970
+rounding:
+  coord_decimals: 6
+  distance_decimals: 1
+  max_coord_shift_m: 0.0557
+  limit_m: 0.1
+size_bytes:
+  source: 51923209
+  output: 41822482
+  output_gzip: 2714978
+nan_literals_fixed: 0
+previous_run: '2026-08-31T05:07:10.370273+00:00'
+diff_vs_previous:
+  spot_count_delta: 0
+notes: switch asset extension to .json so CDNs compress it

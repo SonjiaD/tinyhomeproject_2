@@ -11,7 +11,9 @@ https://tinyhomeproject.netlify.app/
 
 ## 📦 Project Evolution
 
-This tool was originally built using **Streamlit** for rapid prototyping and has since been upgraded to a **Flask + React** full-stack architecture for better performance, flexibility, and deployment scalability.
+This tool was originally built using **Streamlit** for rapid prototyping, then rebuilt as a **Flask + React** full-stack app, and is now a **React + Supabase** app with no backend server of its own.
+
+The Flask layer was removed because it had become a thin proxy in front of Supabase plus a file server for the 52 MB parking map. Running it on Render's free tier meant the instance slept after 15 minutes and the next visitor waited 30-60s for it to boot. The map is now a CDN asset and the database enforces access with Row Level Security, so there is nothing left to keep warm.
 
 ---
 
@@ -33,14 +35,13 @@ Now rebuilt with a modern architecture:
 - **Leaflet** for interactive mapping
 - **Recharts** for displaying AHP weights
 
-#### ⚙️ Backend
-- **Flask** (Python)
-- **Supabase** (PostgreSQL) for storing submissions
-- **CORS + .env** for secure deployment
+#### ⚙️ Data layer
+- **Supabase** (PostgreSQL) accessed directly from the browser
+- **Row Level Security** so each user can only read and write their own votes
+- **Python pipeline** (`data_pipeline/`) for generating and syncing the spatial data
 
 #### ☁️ Deployment
-- **Frontend:** [Netlify](https://www.netlify.com/)
-- **Backend:** [Render](https://render.com/)
+- **Frontend:** [Netlify](https://www.netlify.com/) — builds from `main`, no other deploy step
 - **Database:** [Supabase](https://supabase.com/) (PostgreSQL)
 
 ---
@@ -65,42 +66,7 @@ git clone https://github.com/SonjiaD/tinyhomeproject
 cd tinyhomeproject
 ```
 
-### 2. Backend (Flask) — Terminal 1
-
-Activate the virtual environment from the repo root, then run the backend:
-
-```bash
-# Windows
-venv\Scripts\activate
-
-# macOS/Linux
-# source venv/bin/activate
-```
-
-If you don't have a `venv/` folder yet, create one first:
-
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
-
-Then install dependencies and start the server:
-
-```bash
-cd backend
-pip install -r requirements.txt
-python app.py
-```
-
-The backend runs on `http://localhost:10000`.
-
-> You also need a `backend/.env` file with your Supabase credentials:
-> ```ini
-> SUPABASE_URL=your-supabase-project-url
-> SUPABASE_KEY=your-supabase-anon-key
-> ```
-
-### 3. Frontend (React) — Terminal 2
+### 2. Frontend
 
 ```bash
 cd frontend
@@ -108,9 +74,35 @@ npm install
 npm run dev
 ```
 
-The frontend runs on `http://localhost:5173`. Open that URL in your browser.
+The app runs on `http://localhost:5173`. That is the only server you need — there is no backend to start.
 
-> **How it works:** `npm run dev` loads `frontend/.env.local` which points API calls to `http://localhost:10000` (local backend). Production builds (`npm run build`) load `frontend/.env.production` which points to the deployed Render backend. No code changes needed to switch.
+> Create `frontend/.env.local` with your Supabase project credentials:
+> ```ini
+> VITE_SUPABASE_URL=your-supabase-project-url
+> VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+> VITE_GOOGLE_SV_KEY=your-google-street-view-key
+> ```
+> The anon key is safe to ship in the bundle: Row Level Security decides what it can actually
+> do. The same variables are configured in the Netlify dashboard for production.
+
+### 3. Map data
+
+The parking map ships as a bundle asset, generated from the pipeline output:
+
+```bash
+python data_pipeline/scripts/export_polygons_for_web.py
+```
+
+This writes `frontend/src/assets/parking_polygons.json` and `frontend/src/lib/parkingMeta.ts`.
+Both are committed, so you only need to rerun it after regenerating the polygons.
+
+> **Admin scripts only:** `sync_sites_to_supabase.py` and `export_research_data.py` need a
+> service-role key in `.env` at the repo root. That key bypasses Row Level Security, so it
+> must never reach the frontend.
+> ```ini
+> SUPABASE_URL=your-supabase-project-url
+> SUPABASE_SERVICE_ROLE_KEY=your-service-role-secret
+> ```
 
 ---
 

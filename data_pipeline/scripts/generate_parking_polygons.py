@@ -342,7 +342,7 @@ def main():
         "total_spots": total,
         "features": features,
     }
-    # Compact, no spaces — backend/app.py extracts total_spots via a brittle regex
+    # Compact, no spaces — export_polygons_for_web.py reads total_spots from this file
     # (r'"total_spots":(\d+)') that requires no space after the colon. Do not
     # pretty-print this file.
     with open(latest_output, "w") as f:

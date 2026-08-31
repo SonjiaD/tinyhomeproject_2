@@ -10,7 +10,7 @@ neighborhood (from profiles) and the site's neighborhood (from sites).
 
 Requires a SERVICE ROLE key (not the anon key): the `sites` table has RLS enabled with a
 public-read-only policy, so writes must come from the trusted service role. Add
-SUPABASE_SERVICE_ROLE_KEY to backend/.env (Supabase dashboard -> Settings -> API ->
+SUPABASE_SERVICE_ROLE_KEY to .env at the repo root (Supabase dashboard -> Settings -> API ->
 service_role secret). Never expose this key in the frontend.
 
 Usage:
@@ -54,11 +54,11 @@ PASSTHROUGH_FIELDS = [
 
 
 def get_client():
-    load_dotenv(ROOT / "backend" / ".env")
+    load_dotenv(ROOT / ".env")
     url = os.getenv("SUPABASE_URL")
     key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
     if not url or not key:
-        print("ERROR: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in backend/.env")
+        print("ERROR: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in .env at the repo root")
         print("  The sites table has RLS enabled, so writes require the service_role key")
         print("  (Supabase dashboard -> Settings -> API -> service_role secret).")
         sys.exit(1)

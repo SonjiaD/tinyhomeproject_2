@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import axios from 'axios'
 import { formatDistance, normalize } from '../lib/normalization'
-import { getAuthHeaders } from '../lib/supabase'
+import { submitVote, deleteVote } from '../lib/api'
 import type { VoteSite, VoteTally } from '../lib/types'
 import type { DistanceBounds } from '../lib/normalization'
 
@@ -34,9 +33,8 @@ interface SitePanelProps {
   allBounds: Record<string, DistanceBounds>
   voteTally: VoteTally
   myVote: boolean | undefined
-  userId: string | undefined
   /** The note this user already saved for this site, so the textarea can be edited rather
-   *  than silently overwritten. Optional — VotePage renders this panel without vote state. */
+   *  than silently overwritten. */
   savedComment?: string
   onClose: () => void
   onVoteSubmitted: (siteId: string, newTally: VoteTally, support: boolean) => void
@@ -44,7 +42,7 @@ interface SitePanelProps {
   onCommentSaved?: (siteId: string, comment: string) => void
 }
 
-export function SitePanel({ site, allBounds, voteTally, myVote, userId, savedComment, onClose, onVoteSubmitted, onVoteUndone, onCommentSaved }: SitePanelProps) {
+export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, onClose, onVoteSubmitted, onVoteUndone, onCommentSaved }: SitePanelProps) {
   const [comment, setComment] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [savingNote, setSavingNote] = useState(false)
@@ -67,10 +65,7 @@ export function SitePanel({ site, allBounds, voteTally, myVote, userId, savedCom
     }
     onVoteUndone(site.id, newTally)
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/api/votes`, {
-        data: { site_id: site.id, user_id: userId },
-        headers: await getAuthHeaders(),
-      })
+      await deleteVote(site.id)
       // The note lived on the deleted vote row, so drop it from the panel and the cache too.
       setComment('')
       setLastSaved('')
@@ -89,12 +84,7 @@ export function SitePanel({ site, allBounds, voteTally, myVote, userId, savedCom
     setError(null)
     const text = comment.trim()
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/votes`, {
-        site_id: site.id,
-        support: myVote,
-        comment: text,
-        user_id: userId,
-      }, { headers: await getAuthHeaders() })
+      await submitVote(site.id, myVote, text)
       onCommentSaved?.(site.id, text)
       setNoteSaved(true)
       setTimeout(() => setNoteSaved(false), 2000)
@@ -127,12 +117,7 @@ export function SitePanel({ site, allBounds, voteTally, myVote, userId, savedCom
       // Always send the textarea's current contents — it is prefilled with the saved note,
       // so flipping a vote carries the note across instead of nulling it.
       const text = comment.trim()
-      await axios.post(`${import.meta.env.VITE_API_URL}/api/votes`, {
-        site_id: site.id,
-        support,
-        comment: text,
-        user_id: userId,
-      }, { headers: await getAuthHeaders() })
+      await submitVote(site.id, support, text)
       onCommentSaved?.(site.id, text)
     } catch {
       setError('Failed to save your vote. Please try again.')

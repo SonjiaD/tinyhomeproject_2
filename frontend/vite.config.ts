@@ -1,12 +1,5 @@
 import { defineConfig } from 'vite'
 
-export default defineConfig({
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:10000',
-        changeOrigin: true,
-      },
-    },
-  },
-})
+// No dev proxy: the app talks to Supabase directly and loads its map data as a bundle
+// asset, so there is no backend to forward /api to.
+export default defineConfig({})

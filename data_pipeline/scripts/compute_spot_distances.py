@@ -277,7 +277,7 @@ def main():
     }
     with open(LATEST_FILE, "w", encoding="utf-8") as f:
         # Compact, no spaces — must match generate_parking_polygons.py's format exactly.
-        # backend/app.py extracts total_spots via a brittle regex (r'"total_spots":(\d+)')
+        # export_polygons_for_web.py reads total_spots straight off the parsed JSON
         # that requires no space after the colon; pretty-printing here breaks that parse.
         json.dump(updated_geojson, f, separators=(",", ":"))
 

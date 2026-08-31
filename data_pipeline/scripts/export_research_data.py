@@ -12,7 +12,7 @@ Writes two layers:
 
 Requires a SERVICE ROLE key (not the anon key): profiles has RLS enabled, so reading every
 user's row for research requires the service role. Add SUPABASE_SERVICE_ROLE_KEY to
-backend/.env (Supabase dashboard -> Settings -> API -> service_role secret). This is an
+.env at the repo root (Supabase dashboard -> Settings -> API -> service_role secret). This is an
 admin-only tool — never ship this key to the frontend.
 
 Usage:
@@ -49,11 +49,11 @@ EXPORTS = [
 
 
 def get_client():
-    load_dotenv(ROOT / "backend" / ".env")
+    load_dotenv(ROOT / ".env")
     url = os.getenv("SUPABASE_URL")
     key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
     if not url or not key:
-        print("ERROR: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in backend/.env")
+        print("ERROR: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in .env at the repo root")
         print("  profiles has RLS enabled, so exporting every user's data requires the")
         print("  service_role key (Supabase dashboard -> Settings -> API -> service_role secret).")
         sys.exit(1)

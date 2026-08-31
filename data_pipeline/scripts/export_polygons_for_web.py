@@ -7,6 +7,10 @@ free tier, which meant every visitor after an idle period waited out a cold boot
 map could draw. The file is now a static asset built into the frontend bundle, so it is
 served straight from Netlify's CDN with a content-hashed, immutable URL.
 
+The output uses a .json extension rather than .geojson on purpose: CDNs compress by
+content type, and an unrecognised .geojson type can be served uncompressed - which would
+mean shipping 41.8 MB instead of 2.7 MB. GeoJSON is JSON, so the extension is accurate.
+
 The only transformation is rounding. Source coordinates carry ~17 decimal places, which is
 float64 print noise on geometry derived from OSM street centrelines that are themselves
 accurate to roughly 1-5 m. Rounding to 6 dp (~11 cm) and distances to 0.1 m discards digits
@@ -20,7 +24,7 @@ Usage:
     python data_pipeline/scripts/export_polygons_for_web.py [--notes "..."]
 
 Outputs:
-    frontend/src/assets/parking_polygons.geojson   (imported with ?url by ParkingVotePage)
+    frontend/src/assets/parking_polygons.json      (imported with ?url by ParkingVotePage)
     frontend/src/lib/parkingMeta.ts                (TOTAL_SPOTS, replaces /api/polygon_count)
     data/runs/<timestamp>_export_polygons_for_web/manifest.yaml  (history record)
 """
@@ -37,7 +41,7 @@ import run_history
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "data" / "polygons" / "parking_polygons_latest.geojson"
-ASSET_OUT = ROOT / "frontend" / "src" / "assets" / "parking_polygons.geojson"
+ASSET_OUT = ROOT / "frontend" / "src" / "assets" / "parking_polygons.json"
 META_OUT = ROOT / "frontend" / "src" / "lib" / "parkingMeta.ts"
 SCRIPT_NAME = "export_polygons_for_web"
 

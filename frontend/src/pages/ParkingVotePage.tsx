@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { MapContainer, TileLayer, useMap, useMapEvents, Circle, Rectangle, Polyline, Polygon, CircleMarker, Marker, Tooltip } from 'react-leaflet'
 import L, { LatLngBounds, LatLng } from 'leaflet'
-import axios from 'axios'
 import confetti from 'canvas-confetti'
 import type { VoteSite, VoteTally, VoteCountsMap } from '../lib/types'
 import { useParkingCount } from '../lib/useParkingCount'
@@ -12,9 +11,10 @@ import { SitePanel } from '../components/SitePanel'
 import { ShareButtons } from '../components/ShareButtons'
 import { ProgressToast } from '../components/ui'
 import { useAuth } from '../contexts/AuthContext'
-import { getAuthHeaders } from '../lib/supabase'
-
-const API = import.meta.env.VITE_API_URL || ''
+import {
+  POLYGON_URL, BATCH_CHUNK, fetchVoteCounts, fetchTotalYes, fetchMyVotes,
+  submitBatch as apiSubmitBatch, deleteBatch as apiDeleteBatch,
+} from '../lib/api'
 const MIN_ZOOM = 14
 
 type DrawMode = 'none' | 'rectangle' | 'circle' | 'paint' | 'polygon'
@@ -200,17 +200,6 @@ function pointInRingRaw(lat: number, lon: number, ring: number[][]): boolean {
       inside = !inside
   }
   return inside
-}
-
-// /api/votes/mine returns the flat {site_id: support} map with this user's saved notes
-// smuggled alongside under a reserved key (see the endpoint's docstring). Split the two
-// apart, tolerating an older backend that doesn't send the key at all.
-const COMMENTS_KEY = '__comments__'
-function splitVotesPayload(data: any): { votes: Record<string, boolean>; comments: Record<string, string> } {
-  const raw = { ...(data ?? {}) } as Record<string, any>
-  const comments = (raw[COMMENTS_KEY] ?? {}) as Record<string, string>
-  delete raw[COMMENTS_KEY]
-  return { votes: raw as Record<string, boolean>, comments }
 }
 
 // ── Canvas-rendered GeoJSON layer — created ONCE, styled imperatively ─────────
@@ -684,6 +673,7 @@ export default function ParkingVotePage() {
   const { user, profile } = useAuth()
   const parkingCount = useParkingCount()
   const [rawGeojson, setRawGeojson] = useState<any>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [voteCounts, setVoteCounts] = useState<VoteCountsMap>({})
   const [allBounds, setAllBounds] = useState<Record<string, DistanceBounds>>({})
   const [userVotes, setUserVotes] = useState<Record<string, boolean>>({})
@@ -812,8 +802,7 @@ export default function ParkingVotePage() {
 
   const fetchCommunityTotal = useCallback(async () => {
     try {
-      const res = await axios.get(`${API}/api/votes/summary`)
-      setCommunityTotal(res.data.total_yes ?? null)
+      setCommunityTotal(await fetchTotalYes())
     } catch { /* non-critical */ }
   }, [])
 
@@ -825,17 +814,16 @@ export default function ParkingVotePage() {
   const reconcileVotesFromServer = useCallback(async () => {
     if (!user?.id) return
     try {
-      const [mineRes, countsRes] = await Promise.all([
-        axios.get(`${API}/api/votes/mine`, { headers: await getAuthHeaders() }),
-        axios.get(`${API}/api/votes`),
+      const [{ votes: mine, comments }, counts] = await Promise.all([
+        fetchMyVotes(),
+        fetchVoteCounts(),
       ])
-      const { votes: mine, comments } = splitVotesPayload(mineRes.data)
       setUserVotes(mine)
       setUserComments(comments)
       const all = JSON.parse(localStorage.getItem('parkingVotes_v1') || '{}') as Record<string, Record<string, boolean>>
       all[user.id] = mine
       localStorage.setItem('parkingVotes_v1', JSON.stringify(all))
-      setVoteCounts(countsRes.data || {})
+      setVoteCounts(counts)
     } catch { /* keep optimistic state; the poll will eventually reconcile */ }
     fetchCommunityTotal()
   }, [user?.id, fetchCommunityTotal])
@@ -870,13 +858,10 @@ export default function ParkingVotePage() {
     // user casts/undoes (single or batch — all write localStorage) while it's in flight would
     // otherwise be clobbered by the stale snapshot. We detect those by diffing against this.
     const startSnapshot = readLocalMine()
-    getAuthHeaders()
-      .then(headers => axios.get(`${API}/api/votes/mine`, { headers }))
-      .then(res => {
+    fetchMyVotes()
+      .then(({ votes: mine, comments }) => {
         if (cancelled) return
-        const split = splitVotesPayload(res.data)
-        const mine = split.votes
-        setUserComments(split.comments)
+        setUserComments(comments)
         const currentLocal = readLocalMine()
         // Re-apply changes made during the fetch window (local wins for those keys only).
         for (const id of new Set([...Object.keys(startSnapshot), ...Object.keys(currentLocal)])) {
@@ -917,10 +902,13 @@ export default function ParkingVotePage() {
 
   useEffect(() => {
     async function load() {
-      const [geoRes, voteRes] = await Promise.all([
-        fetch(`${API}/api/polygon_map`),
-        axios.get(`${API}/api/votes`).catch(() => ({ data: {} })),
+      // The map is a content-hashed bundle asset served from the CDN, so this resolves from
+      // cache on a repeat visit. Tallies are non-critical: an empty map still renders.
+      const [geoRes, counts] = await Promise.all([
+        fetch(POLYGON_URL),
+        fetchVoteCounts().catch(() => ({})),
       ])
+      if (!geoRes.ok) throw new Error(`Map data failed to load (${geoRes.status})`)
       const geojson = await geoRes.json()
       const sitesForBounds = geojson.features.map((f: any) => ({
         id: f.properties.id, lat: 0, lon: 0, address: '',
@@ -934,9 +922,14 @@ export default function ParkingVotePage() {
       }))
       setRawGeojson(geojson)
       setAllBounds(computeAllBounds(sitesForBounds, [...DIST_FIELDS, ...DISPLAY_ONLY_FIELDS]))
-      setVoteCounts(voteRes.data || {})
+      setVoteCounts(counts)
     }
-    load()
+    // Without this catch a failure left an unhandled rejection, rawGeojson null, and the
+    // loading overlay spinning forever with no way to know anything had gone wrong.
+    load().catch(err => {
+      console.error('Failed to load parking map', err)
+      setLoadError(err instanceof Error ? err.message : 'Could not load the parking map.')
+    })
   }, [])
 
   useEffect(() => {
@@ -1097,13 +1090,11 @@ export default function ParkingVotePage() {
         return prev - ids.filter(id => userVotes[id] === true).length
       }
     })
-    const CHUNK = 500
     setBatchProgress({ done: 0, total: ids.length })
     try {
-      for (let i = 0; i < ids.length; i += CHUNK) {
-        const chunk = ids.slice(i, i + CHUNK)
-        await axios.post(`${API}/api/votes/batch`, { site_ids: chunk, support, comment: batchComment || null, user_id: user.id }, { timeout: 15000, headers: await getAuthHeaders() })
-        setBatchProgress({ done: Math.min(i + CHUNK, ids.length), total: ids.length })
+      for (let i = 0; i < ids.length; i += BATCH_CHUNK) {
+        await apiSubmitBatch(ids.slice(i, i + BATCH_CHUNK), support, batchComment)
+        setBatchProgress({ done: Math.min(i + BATCH_CHUNK, ids.length), total: ids.length })
       }
       setVoteCounts(prev => {
         const next = { ...prev }
@@ -1189,13 +1180,11 @@ export default function ParkingVotePage() {
       })
       return n
     })
-    const CHUNK = 500
     setBatchProgress({ done: 0, total: ids.length })
     try {
-      for (let i = 0; i < ids.length; i += CHUNK) {
-        const chunk = ids.slice(i, i + CHUNK)
-        await axios.delete(`${API}/api/votes/batch`, { data: { site_ids: chunk, user_id: user.id }, timeout: 15000, headers: await getAuthHeaders() })
-        setBatchProgress({ done: Math.min(i + CHUNK, ids.length), total: ids.length })
+      for (let i = 0; i < ids.length; i += BATCH_CHUNK) {
+        await apiDeleteBatch(ids.slice(i, i + BATCH_CHUNK))
+        setBatchProgress({ done: Math.min(i + BATCH_CHUNK, ids.length), total: ids.length })
       }
       fetchCommunityTotal()
     } catch {
@@ -1601,7 +1590,6 @@ export default function ParkingVotePage() {
             allBounds={allBounds}
             voteTally={selectedTally}
             myVote={selectedId ? userVotes[selectedId] : undefined}
-            userId={user?.id}
             savedComment={selectedId ? userComments[selectedId] : undefined}
             onClose={() => setSelectedId(null)}
             onCommentSaved={(id: string, text: string) => {
@@ -1686,13 +1674,28 @@ export default function ParkingVotePage() {
       )}
 
       {/* Loading overlay */}
-      {loading && (
+      {loading && !loadError && (
         <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-[9999]">
           <div className="text-center">
             <div className="w-8 h-8 border-2 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
             <p className="text-sm text-gray-500">
-              Loading {parkingCount ? `${parkingCount.toLocaleString()} ` : ''}parking spaces…
+              Loading {parkingCount.toLocaleString()} parking spaces…
             </p>
+          </div>
+        </div>
+      )}
+
+      {loadError && (
+        <div className="absolute inset-0 bg-white/90 flex items-center justify-center z-[9999] px-6">
+          <div className="text-center max-w-sm">
+            <p className="text-sm font-semibold text-gray-800 mb-1">Couldn't load the map</p>
+            <p className="text-sm text-gray-500 mb-4">{loadError}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition-colors"
+            >
+              Try again
+            </button>
           </div>
         </div>
       )}

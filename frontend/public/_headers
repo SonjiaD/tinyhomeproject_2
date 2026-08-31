@@ -1,0 +1,5 @@
+# Vite fingerprints everything under /assets/ with a content hash, so the URL changes
+# whenever the bytes do. That makes it safe to tell browsers never to revalidate — which
+# matters most for the 41.8 MB parking map: a repeat visit should cost zero network.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

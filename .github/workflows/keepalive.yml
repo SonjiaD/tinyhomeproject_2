@@ -22,19 +22,51 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping backend (wakes Render + touches Supabase)
-        # No "|| echo ... non-fatal" here on purpose: if this fails, the step MUST fail,
-        # so the run shows red in the Actions tab and GitHub emails you automatically.
-        # A keepalive that can't fail loudly can't actually alert you to anything.
+      - name: Touch Supabase so the free project does not pause
+        # This used to call the Flask backend's /api/ping, which then queried Supabase on our
+        # behalf. The backend is gone, so this talks to PostgREST directly — which is also
+        # what the browser does, so it exercises the real path end to end.
         #
-        # Render free tier sleeps after ~15 min idle, and we only ping every ~2.4h, so it's
-        # asleep on nearly every run and has to cold-boot (this app loads a 52MB geojson file
-        # at startup, so that boot isn't instant). A run that failed with 6x fast 503s in ~76s
-        # showed the old 5-retry/15s-delay budget (~75s total) was shorter than the actual
-        # cold-boot time. Widened to comfortably outlast a slow wake-up.
+        # The retry budget is far smaller than it was. The old one had to outlast a Render
+        # cold boot (~10 retries, 20s apart) because the free instance was asleep on nearly
+        # every run and loaded a 52 MB geojson at startup. Nothing boots now; Supabase either
+        # answers in milliseconds or is genuinely unwell, so 3 tries is plenty.
+        #
+        # Three distinct queries, not one: the pausing docs ask for "a few user requests",
+        # and hitting the two public views alongside a table also proves the views still
+        # resolve — a broken view would otherwise stay invisible until a user hit the site.
+        #
+        # No "|| true" anywhere on purpose: if this fails the step MUST fail, so the run goes
+        # red in the Actions tab and GitHub emails you. A keepalive that cannot fail loudly
+        # cannot alert you to anything.
+        #
+        # SUPABASE_ANON_KEY is not really a secret — it ships inside the JS bundle — but it
+        # lives in Actions secrets so the URL and key stay configurable in one place.
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          curl -fsS "${{ secrets.BACKEND_URL }}/api/ping" \
-            --max-time 60 \
-            --retry 10 \
-            --retry-delay 20 \
-            --retry-all-errors
+          set -euo pipefail
+
+          if [ -z "${SUPABASE_URL}" ] || [ -z "${SUPABASE_ANON_KEY}" ]; then
+            echo "SUPABASE_URL and SUPABASE_ANON_KEY must be set in repository secrets."
+            exit 1
+          fi
+
+          touch_endpoint() {
+            echo "-> $1"
+            curl -fsS "${SUPABASE_URL}/rest/v1/$1" \
+              -H "apikey: ${SUPABASE_ANON_KEY}" \
+              -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+              --max-time 30 \
+              --retry 3 \
+              --retry-delay 10 \
+              --retry-all-errors \
+              -o /dev/null
+          }
+
+          touch_endpoint "sites?select=site_id&limit=1"
+          touch_endpoint "vote_totals?select=total_yes"
+          touch_endpoint "suggestions_public?select=id&limit=1"
+
+          echo "Supabase touched successfully."
