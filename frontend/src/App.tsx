@@ -2,9 +2,7 @@ import { BrowserRouter as Router, Routes, Route, NavLink, Link, Navigate, useLoc
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { AuthGuard } from './components/AuthGuard'
 import AboutPage from './pages/AboutPage'
-import VotePage from './pages/VotePage'
 import SuggestPage from './pages/SuggestPage'
-import PolygonMapPage from './pages/PolygonMapPage'
 import ParkingVotePage from './pages/ParkingVotePage'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
@@ -18,9 +16,7 @@ const PRE_AUTH_ROUTES = ['/', '/login', '/signup', '/onboarding/goal', '/intro']
 const navLinks = [
   // { to: '/home', label: 'Home' },
   { to: '/parking-vote', label: 'Vote on Parking' },
-  // { to: '/vote', label: 'Community Vote' },
   // { to: '/suggest', label: 'Suggest a Location' },
-  // { to: '/polygon-map', label: 'Parking Spots' },
   { to: '/intro', label: 'Intro' },
   { to: '/about', label: 'About' },
   { to: '/profile', label: 'Profile' },
@@ -103,10 +99,8 @@ function AppShell() {
 
         {/* Authenticated app routes */}
         <Route path="/home" element={<Navigate to="/parking-vote" replace />} />
-        <Route path="/vote" element={<AuthGuard><VotePage /></AuthGuard>} />
         <Route path="/suggest" element={<AuthGuard><SuggestPage /></AuthGuard>} />
         <Route path="/parking-vote" element={<AuthGuard><ParkingVotePage /></AuthGuard>} />
-        <Route path="/polygon-map" element={<AuthGuard><PolygonMapPage /></AuthGuard>} />
         <Route path="/profile" element={<AuthGuard><ProfilePage /></AuthGuard>} />
       </Routes>
       </div>

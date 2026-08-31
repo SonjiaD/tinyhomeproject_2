@@ -12,8 +12,8 @@ export const DIST_FIELDS = [
   'homeless_service_dist',
 ] as const
 
-// Fields with no OSM equivalent that drive computeSiteScore stay on DIST_FIELDS only, so
-// VotePage's composite score is unaffected. These 3 power the SitePanel amenity bars only.
+// These 3 have no OSM equivalent and are display-only: they power the SitePanel amenity
+// bars, and are deliberately kept off DIST_FIELDS.
 export const DISPLAY_ONLY_FIELDS = [
   'water_fountain_dist',
   'streams_oakland_dist',
@@ -50,11 +50,6 @@ export function normalize(value: number, bounds: DistanceBounds): number {
   if (bounds.max === bounds.min) return 1
   // closer = higher score, so invert
   return 1 - (value - bounds.min) / (bounds.max - bounds.min)
-}
-
-export function computeSiteScore(site: VoteSite, allBounds: Record<DistField, DistanceBounds>): number {
-  const scores = DIST_FIELDS.map(f => normalize(site[f], allBounds[f]))
-  return scores.reduce((a, b) => a + b, 0) / scores.length
 }
 
 export function formatDistance(meters: number): string {
