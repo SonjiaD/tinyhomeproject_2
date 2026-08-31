@@ -99,10 +99,16 @@ alter table public.votes
 -- Deliberately permissive: pipeline ids look like "296553310_L_3" but manually added spots
 -- use a name prefix ("mandela_001_L_0"). This rejects junk and oversized values without
 -- encoding a format the pipeline is free to change. Verified: 0 existing rows violate it.
+--
+-- Hyphens are allowed because add_manual_points.py's id_prefix is a hand-written slug
+-- (TARGET_STREETS), and the natural next entry after "mandela" is something like "san-pablo".
+-- A prefix this rejected would still sync into sites and render on the map, but every vote on
+-- that street would fail with nothing in the UI to explain why — so the charset is kept wider
+-- than today's data strictly requires.
 alter table public.votes drop constraint if exists votes_site_id_shape;
 alter table public.votes
   add constraint votes_site_id_shape
-  check (site_id ~ '^[A-Za-z0-9_]{1,64}$');
+  check (site_id ~ '^[A-Za-z0-9_-]{1,64}$');
 
 -- NO foreign key from votes.site_id to sites.site_id, on purpose.
 -- sync_sites_to_supabase.py prunes sites absent from a regenerated geojson, and spot ids

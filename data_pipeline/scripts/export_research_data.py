@@ -4,7 +4,8 @@ data collected by the website (signups, onboarding survey answers, votes, vote h
 site metadata) can be analyzed offline in Excel / pandas / R.
 
 Writes two layers:
-  1. The full NORMALIZED dataset  — one CSV per table: profiles, sites, votes, vote_events.
+  1. The full NORMALIZED dataset  — one CSV per table: profiles, sites, votes, vote_events,
+     suggestions.
      Because these are interconnected by user_id / site_id, you can reproduce ANY view or
      answer ANY custom question offline, not just the two pre-built ones.
   2. The two CONVENIENCE views     — votes_research.csv (one row per vote, every site +
@@ -19,7 +20,7 @@ Usage:
     python data_pipeline/scripts/export_research_data.py [--notes "..."]
 
 Outputs:
-    data/exports/<timestamp>/{profiles,sites,votes,vote_events,votes_research,site_leaderboard}.csv
+    data/exports/<timestamp>/{profiles,sites,votes,vote_events,suggestions,votes_research,site_leaderboard}.csv
     data/runs/<timestamp>_export_research_data/manifest.yaml  (history record)
 """
 
@@ -45,6 +46,10 @@ EXPORTS = [
     ("vote_events.csv",      "vote_events",        "event_at"),
     ("votes_research.csv",   "vote_research_view", "created_at"),
     ("site_leaderboard.csv", "site_vote_summary",  None),        # sorted below by support_count
+    # Read from the base table, not suggestions_public: that view strips name/occupation for
+    # the browser, but this export runs as the service role and the submitter details are part
+    # of the research record.
+    ("suggestions.csv",      "suggestions",        "created_at"),
 ]
 
 

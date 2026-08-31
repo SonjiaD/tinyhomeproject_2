@@ -1,0 +1,21 @@
+# Netlify build configuration.
+#
+# Kept in the repo rather than the dashboard so the build is reviewable and reproducible, and
+# so repointing a site at this repo does not depend on getting dashboard fields right by hand.
+# Values here override whatever the site has configured.
+
+[build]
+  base = "frontend"           # npm install and the build both run from here
+  command = "npm run build"
+  publish = "dist"            # resolved relative to `base`, i.e. frontend/dist
+
+[build.environment]
+  # Vite 5 requires Node >= 18. Pinned so a change to Netlify's default cannot alter a build.
+  NODE_VERSION = "20"
+
+# Caching and the SPA fallback live in frontend/public/_headers and frontend/public/_redirects.
+# Vite copies everything in public/ to the publish directory, so both apply as-is:
+#   _headers   — /assets/* immutable, which is what makes the 41.8 MB parking map free on
+#                repeat visits (Vite content-hashes the filename, so the URL changes if the
+#                bytes do)
+#   _redirects — /* -> /index.html 200, so client-side routes survive a hard refresh

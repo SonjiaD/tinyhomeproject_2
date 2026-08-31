@@ -31,6 +31,30 @@ export { TOTAL_SPOTS } from './parkingMeta'
  */
 export const POLYGON_URL = polygonAssetUrl
 
+/**
+ * Bounding box for a valid suggestion pin.
+ *
+ * These numbers are duplicated in the suggestions_bbox CHECK constraint
+ * (supabase/migrations/20260830_02_enable_rls.sql) and MUST stay in sync with it. The database
+ * is the real guard; this copy exists so the UI can reject an out-of-area click with a useful
+ * message, instead of letting Postgres raise a constraint violation that surfaces to the user
+ * as "please try again" — advice that would never succeed.
+ */
+export const OAKLAND_BOUNDS = {
+  minLat: 37.5,
+  maxLat: 38.1,
+  minLng: -122.5,
+  maxLng: -122.0,
+} as const
+
+/** Whether a dropped pin is inside the study area the database will accept. */
+export function isInStudyArea(lat: number, lng: number): boolean {
+  return (
+    lat >= OAKLAND_BOUNDS.minLat && lat <= OAKLAND_BOUNDS.maxLat &&
+    lng >= OAKLAND_BOUNDS.minLng && lng <= OAKLAND_BOUNDS.maxLng
+  )
+}
+
 /** PostgREST caps a single response at 1000 rows; anything unbounded has to page. */
 const PAGE_SIZE = 1000
 
@@ -281,6 +305,9 @@ export async function submitSuggestion(input: {
   occupation?: string | null
   reason?: string | null
 }): Promise<void> {
+  if (!isInStudyArea(Number(input.lat), Number(input.lng))) {
+    throw new Error('That location is outside the Oakland study area.')
+  }
   const { error } = await supabase.from('suggestions').insert({
     lat: Number(input.lat),
     lng: Number(input.lng),

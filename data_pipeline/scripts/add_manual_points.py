@@ -55,6 +55,12 @@ OTHER_DIST_FIELDS = [
 ]
 
 # Corridors to patch: OSM street name -> short id prefix / address label.
+#
+# id_prefix must be a slug of [A-Za-z0-9_-] only. It ends up inside every generated site_id
+# ("<id_prefix>_<NNN>_<L|R>_<n>"), and the votes table enforces that charset via the
+# votes_site_id_shape CHECK. A prefix with a space or punctuation would still sync into `sites`
+# and render on the map, but every vote on that street would be rejected by the database with
+# nothing in the UI to explain it. Keep it lowercase, no spaces.
 TARGET_STREETS = [
     {"osm_name": "Mandela Parkway", "id_prefix": "mandela", "label": "Mandela Parkway"},
 ]

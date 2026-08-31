@@ -9,6 +9,9 @@ It allows users to assign priorities to different urban planning criteria using 
 Check out our website below and try it out!
 https://tinyhomeproject.netlify.app/
 
+> This repository is what that site builds from. It replaced an earlier version that ran a
+> Flask backend on Render; see [Deployment](#-deployment) below.
+
 ## 📦 Project Evolution
 
 This tool was originally built using **Streamlit** for rapid prototyping, then rebuilt as a **Flask + React** full-stack app, and is now a **React + Supabase** app with no backend server of its own.
@@ -103,6 +106,45 @@ Both are committed, so you only need to rerun it after regenerating the polygons
 > SUPABASE_URL=your-supabase-project-url
 > SUPABASE_SERVICE_ROLE_KEY=your-service-role-secret
 > ```
+
+---
+
+## 🚀 Deployment
+
+There is no server to deploy. Netlify builds the frontend from `main`, and the browser talks to
+Supabase directly.
+
+### Netlify
+
+Build settings come from [`netlify.toml`](netlify.toml) — base `frontend/`, `npm run build`,
+publish `dist`, Node 20 — so they are version-controlled rather than set in the dashboard.
+
+Three environment variables must be set in **Site configuration → Environment variables**
+(see [`frontend/.env.example`](frontend/.env.example)):
+
+| Variable | Notes |
+|---|---|
+| `VITE_SUPABASE_URL` | |
+| `VITE_SUPABASE_ANON_KEY` | Public — it ships in the bundle. RLS is what restricts it. |
+| `VITE_GOOGLE_SV_KEY` | Street View thumbnails only |
+
+`frontend/public/_headers` marks `/assets/*` immutable. Vite content-hashes those filenames, so
+the ~2.7 MB (gzipped) parking map downloads once and is free on every repeat visit.
+
+### Database
+
+Migrations in `supabase/migrations/` are applied through the Supabase SQL editor. Row Level
+Security is what makes direct browser access safe: each user can read and write only their own
+votes, aggregate tallies are exposed through views, and the service-role key stays on your
+machine for the `data_pipeline/` admin scripts.
+
+### Keepalive
+
+Supabase pauses a free project after ~7 days of inactivity, so
+[`.github/workflows/keepalive.yml`](.github/workflows/keepalive.yml) touches the REST API 10x a
+day. It needs two repository secrets — `SUPABASE_URL` and `SUPABASE_ANON_KEY` — under
+**Settings → Secrets and variables → Actions**. It fails loudly on purpose, so a red run in the
+Actions tab means the database is genuinely unreachable.
 
 ---
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchSuggestions, submitSuggestion } from '../lib/api'
+import { fetchSuggestions, submitSuggestion, isInStudyArea } from '../lib/api'
 import { MapContainer, TileLayer, CircleMarker, Tooltip, useMapEvents } from 'react-leaflet'
 
 interface Suggestion {
@@ -41,6 +41,7 @@ export default function SuggestPage() {
   const [loadError, setLoadError] = useState(false)
 
   const [pendingLatLng, setPendingLatLng] = useState<{ lat: number; lng: number } | null>(null)
+  const [areaError, setAreaError] = useState<string | null>(null)
   const [pendingAddress, setPendingAddress] = useState<string | null>(null)
   const [geocoding, setGeocoding] = useState(false)
   const [panelState, setPanelState] = useState<PanelState>('closed')
@@ -64,6 +65,16 @@ export default function SuggestPage() {
   }, [])
 
   async function handleMapClick(lat: number, lng: number) {
+    // The database enforces this bbox too (suggestions_bbox). Checking here means an
+    // out-of-area click fails immediately with a reason, instead of after the user has
+    // filled in the form only to be told "please try again" — which would never work.
+    if (!isInStudyArea(lat, lng)) {
+      setAreaError('That spot is outside Oakland. Please choose a location within the city.')
+      setPanelState('closed')
+      setPendingLatLng(null)
+      return
+    }
+    setAreaError(null)
     setPendingLatLng({ lat, lng })
     setPendingAddress(null)
     setGeocoding(true)
@@ -175,6 +186,16 @@ export default function SuggestPage() {
                 </p>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Out-of-area click. Rendered here rather than in the form panel, because that guard
+            closes the panel — the panel's own error block would never be seen. */}
+        {areaError && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000]
+            bg-accent-100 border border-accent-500 rounded-lg px-3 py-2 shadow-sm
+            text-xs text-accent-700 max-w-xs text-center">
+            {areaError}
           </div>
         )}
 
