@@ -222,7 +222,7 @@ function FAQItem({ question, answer }: FAQItem) {
 
 export function FAQSection() {
   const parkingCount = useParkingCount()
-  const displayCount = parkingCount ? parkingCount.toLocaleString() : '45,332'
+  const displayCount = parkingCount.toLocaleString()
 
   const items = faqItems.map(item => {
     if (!item.question.includes('__COUNT__')) return item

@@ -51,7 +51,7 @@ export default function SignupPage() {
         <div className="relative z-10">
           <p className="text-xs font-semibold tracking-[0.2em] uppercase text-teal-400 mb-3">Oakland, California</p>
           <p className="text-2xl font-bold text-white leading-snug mb-4">
-            {parkingCount ? parkingCount.toLocaleString() : '65,334'} parking spaces.<br />26,251 homes needed.
+            {parkingCount.toLocaleString()} parking spaces.<br />26,251 homes needed.
           </p>
           <p className="text-teal-300 text-sm leading-relaxed">
             The math is simple. The solution needs Oaklanders like you.

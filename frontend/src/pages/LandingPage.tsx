@@ -517,8 +517,7 @@ export default function LandingPage({ standalone = false }: { standalone?: boole
   const navigate = useNavigate()
   const [[current, direction], setCurrent] = useState([0, 0])
   const wheelLocked = useRef(false)
-  const rawParkingCount = useParkingCount()
-  const parkingCount = rawParkingCount ?? 0
+  const parkingCount = useParkingCount()
 
   // Auto-redirect authenticated users away from the landing page. First-timers who
   // haven't set a goal yet (e.g. arriving via the email-confirmation link) go to the
