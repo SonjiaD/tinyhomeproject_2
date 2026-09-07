@@ -23,11 +23,7 @@ interface AuthContextType {
   session: Session | null
   profile: Profile | null
   loading: boolean
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>
-  // `session` is true when the signup logged the user straight in (email confirmation is
-  // disabled on the project), so the caller can route on into onboarding instead of showing
-  // a "check your email" screen for a mail that will never arrive.
-  signUp: (email: string, password: string, name: string) => Promise<{ error: Error | null; session: boolean }>
+  signInWithGoogle: () => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
 }
@@ -86,55 +82,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await loadProfile(user?.id)
   }
 
-  async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+  /**
+   * Start the Google sign-in redirect.
+   *
+   * There is no separate signup: OAuth creates the account on first use, so one button covers
+   * both. That is also why the password flows this replaced are gone — with no password there
+   * is nothing to forget, so no reset flow and no outbound email. Supabase's built-in mailer
+   * only delivers to project team addresses, so a reset flow would have required third-party
+   * SMTP and an ongoing email-deliverability problem to go with it.
+   *
+   * Supabase sends the user to Google, then back to /auth/callback with the session in the
+   * URL, which supabase-js consumes automatically. This promise resolves when the browser
+   * starts navigating away, not when sign-in completes.
+   */
+  async function signInWithGoogle() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    })
     return { error }
-  }
-
-  async function signUp(email: string, password: string, name: string) {
-    // Supabase doesn't return an error for a duplicate email (anti-enumeration) — it
-    // signals this instead via an empty `identities` array on the raw /signup response,
-    // present only on an existing, already-confirmed account. But supabase-js's own
-    // signUp() can't be used to read this: its client-side response transform assumes
-    // the raw body is wrapped as `{ user: {...} }`, while GoTrue's actual /signup response
-    // (when no session is created yet, i.e. email confirmation is pending) is a FLAT user
-    // object with no `user` key — so the SDK's parsed `data.user` is null for every
-    // pending-confirmation signup, duplicate or brand-new, making the check silently no-op.
-    // Call the REST endpoint directly instead and read the raw body ourselves.
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
-    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
-    let res: Response
-    try {
-      res = await fetch(`${supabaseUrl}/auth/v1/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', apikey: anonKey },
-        body: JSON.stringify({ email, password, data: { full_name: name } }),
-      })
-    } catch {
-      return { error: new Error('Network error. Please check your connection and try again.'), session: false }
-    }
-    const body = await res.json().catch(() => null)
-    if (!res.ok) {
-      // With email confirmation DISABLED, GoTrue stops hiding duplicates behind the empty
-      // `identities` array below and returns a 422/400 "User already registered" instead.
-      // Map it to the same friendly copy so the behaviour survives either project setting.
-      const raw = String(body?.msg || body?.error_description || body?.message || '')
-      if (/already registered|already exists|already been registered/i.test(raw)) {
-        return { error: new Error('An account with this email already exists. Please sign in instead.'), session: false }
-      }
-      return { error: new Error(raw || 'Something went wrong. Please try again.'), session: false }
-    }
-    if (Array.isArray(body?.identities) && body.identities.length === 0) {
-      return { error: new Error('An account with this email already exists. Please sign in instead.'), session: false }
-    }
-    // Email confirmation is disabled on this project, so GoTrue returns a session right here.
-    // Sync it into the SDK's own store so getSession() / onAuthStateChange stay consistent
-    // with what we just did via the raw fetch above.
-    if (body?.access_token && body?.refresh_token) {
-      await supabase.auth.setSession({ access_token: body.access_token, refresh_token: body.refresh_token })
-      return { error: null, session: true }
-    }
-    return { error: null, session: false }
   }
 
   async function signOut() {
@@ -143,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, loading, signIn, signUp, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, signInWithGoogle, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )

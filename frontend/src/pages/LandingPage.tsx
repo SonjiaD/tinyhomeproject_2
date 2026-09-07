@@ -489,14 +489,11 @@ function SlideCTA() {
             Every parking space you vote on is a data point. When enough Oaklanders converge on the same spots, that's where the ordinance starts.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/signup">
+            {/* One button: with Google, signing in and signing up are the same action, so
+                offering both split attention between two doors into the same place. */}
+            <Link to="/login">
               <Button size="lg" className="w-full px-8 py-4 text-lg shadow-xl shadow-teal-900/50">
                 Get Started
-              </Button>
-            </Link>
-            <Link to="/login">
-              <Button variant="subtle" size="lg" className="w-full px-8 py-4 text-lg">
-                Log In
               </Button>
             </Link>
           </div>

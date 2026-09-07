@@ -3,11 +3,13 @@ import { AuthProvider } from './contexts/AuthContext'
 import { AuthGuard } from './components/AuthGuard'
 import { SiteNav } from './components/SiteNav'
 import AboutPage from './pages/AboutPage'
+import PrivacyPage from './pages/PrivacyPage'
+import TermsPage from './pages/TermsPage'
 import SuggestPage from './pages/SuggestPage'
 import ParkingVotePage from './pages/ParkingVotePage'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
-import SignupPage from './pages/SignupPage'
+import AuthCallbackPage from './pages/AuthCallbackPage'
 import OnboardingGoalPage from './pages/OnboardingGoalPage'
 import ProfilePage from './pages/ProfilePage'
 import { ParkletExplainer } from './components/ParkletExplainer'
@@ -23,7 +25,7 @@ import { ParkletExplainer } from './components/ParkletExplainer'
  * The slideshow flips between light and dark slides, and keeping that knowledge inside the
  * slideshow is what stops slide-theme state leaking into AppShell.
  */
-const ROUTES_WITHOUT_NAV = ['/login', '/signup', '/onboarding/goal', '/', '/intro']
+const ROUTES_WITHOUT_NAV = ['/login', '/signup', '/auth/callback', '/onboarding/goal', '/', '/intro']
 
 function AppNav() {
   const location = useLocation()
@@ -80,8 +82,15 @@ function AppShell() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/intro" element={<LandingPage standalone />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
+        {/* Signing in and signing up are one action with Google, so /signup is kept only so
+            existing links and bookmarks do not 404. */}
+        <Route path="/signup" element={<Navigate to="/login" replace />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/about" element={<AboutPage />} />
+        {/* Public and unauthenticated on purpose: Google requires both to be reachable
+            without signing in before it will publish the OAuth consent screen. */}
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
 
         {/* Onboarding (requires auth) */}
         <Route path="/onboarding/goal" element={<AuthGuard><OnboardingGoalPage /></AuthGuard>} />
