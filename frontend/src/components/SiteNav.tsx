@@ -125,14 +125,14 @@ export function SiteNav({ variant = 'solid', isDark = true }: SiteNavProps) {
           {user ? (
             <button
               onClick={handleSignOut}
-              className={`ml-3 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${idle}`}
+              className={`ml-3 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${idle}`}
             >
               Log out
             </button>
           ) : (
             <Link
               to="/login"
-              className={`ml-3 text-sm font-semibold px-4 py-1.5 rounded-full transition-all backdrop-blur-sm ${pill}`}
+              className={`ml-3 text-sm font-semibold px-4 py-1.5 rounded-lg transition-all backdrop-blur-sm ${pill}`}
             >
               Log in
             </Link>

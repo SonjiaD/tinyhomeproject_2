@@ -4,6 +4,7 @@ import { motion, AnimatePresence, type Transition } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
 import { useParkingCount } from '../lib/useParkingCount'
 import { SiteNav } from '../components/SiteNav'
+import { Button } from '../components/ui'
 import { supabase } from '../lib/supabase'
 
 // ── Animated counter hook ─────────────────────────────────────────────────────
@@ -185,15 +186,12 @@ function SlideHero({ onNext }: { onNext: () => void }) {
           <p className="text-lg text-teal-200 mb-10 leading-relaxed">
             That decision is reversible. Here's the math on what reversing it looks like.
           </p>
-          <button
-            onClick={onNext}
-            className="inline-flex items-center gap-2 bg-teal-500 hover:bg-teal-400 text-white font-semibold px-7 py-3 rounded-full transition-all duration-200 shadow-lg shadow-teal-900/40"
-          >
+          <Button onClick={onNext} className="gap-2 px-7 py-3 shadow-lg shadow-teal-900/40">
             See the numbers
             <svg viewBox="0 0 20 20" className="w-4 h-4" fill="currentColor">
               <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
             </svg>
-          </button>
+          </Button>
         </motion.div>
       </div>
     </div>
@@ -490,17 +488,15 @@ function SlideCTA() {
             Every parking space you vote on is a data point. When enough Oaklanders converge on the same spots, that's where the ordinance starts.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/signup"
-              className="bg-teal-500 hover:bg-teal-400 text-white font-bold px-8 py-4 rounded-full text-lg transition-all duration-200 shadow-xl shadow-teal-900/50"
-            >
-              Get Started
+            <Link to="/signup">
+              <Button size="lg" className="w-full px-8 py-4 text-lg shadow-xl shadow-teal-900/50">
+                Get Started
+              </Button>
             </Link>
-            <Link
-              to="/login"
-              className="bg-white/10 hover:bg-white/20 border border-white/30 text-white font-semibold px-8 py-4 rounded-full text-lg transition-all duration-200 backdrop-blur-sm"
-            >
-              Log In
+            <Link to="/login">
+              <Button variant="subtle" size="lg" className="w-full px-8 py-4 text-lg">
+                Log In
+              </Button>
             </Link>
           </div>
         </motion.div>

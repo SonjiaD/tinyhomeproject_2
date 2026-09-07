@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Button } from '../components/ui'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Home, Key, History, Heart, Briefcase, MapPin, Circle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -263,13 +264,14 @@ export default function OnboardingGoalPage() {
       {error && <p className="text-red-400 text-sm text-center mb-4 bg-red-400/10 rounded-lg px-4 py-2">{error}</p>}
 
       <div className="flex flex-col items-center gap-3">
-        <button
+        <Button
           onClick={goNext}
           disabled={goal === null}
-          className="bg-teal-500 hover:bg-teal-400 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold px-10 py-4 rounded-full text-lg transition-all duration-200 shadow-lg"
+          size="lg"
+          className="px-10 py-4 text-lg shadow-lg"
         >
           {goal ? 'Continue →' : 'Choose a goal to continue'}
-        </button>
+        </Button>
       </div>
     </div>,
 
@@ -334,13 +336,14 @@ export default function OnboardingGoalPage() {
       )}
 
       <div className="flex flex-col items-center gap-3">
-        <button
+        <Button
           onClick={goNext}
           disabled={!neighborhood}
-          className="bg-teal-500 hover:bg-teal-400 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold px-10 py-4 rounded-full text-lg transition-all duration-200 shadow-lg w-full max-w-xs"
+          size="lg"
+          className="px-10 py-4 text-lg shadow-lg w-full max-w-xs"
         >
           Continue →
-        </button>
+        </Button>
         <button
           onClick={() => { setNeighborhood('not-oakland'); goNext() }}
           className="text-teal-300/50 hover:text-teal-300 text-sm transition-colors"
@@ -389,12 +392,13 @@ export default function OnboardingGoalPage() {
       {error && <p className="text-red-400 text-sm text-center mb-4 bg-red-400/10 rounded-lg px-4 py-2">{error}</p>}
 
       <div className="flex flex-col items-center gap-3">
-        <button
+        <Button
           onClick={goNext}
-          className="bg-teal-500 hover:bg-teal-400 text-white font-bold px-10 py-4 rounded-full text-lg transition-all duration-200 shadow-lg w-full max-w-xs"
+          size="lg"
+          className="px-10 py-4 text-lg shadow-lg w-full max-w-xs"
         >
           Continue →
-        </button>
+        </Button>
         <button
           onClick={handleSkipToEnd}
           disabled={saving}
@@ -464,12 +468,13 @@ export default function OnboardingGoalPage() {
       {error && <p className="text-red-400 text-sm text-center mb-4 bg-red-400/10 rounded-lg px-4 py-2">{error}</p>}
 
       <div className="flex flex-col items-center gap-3">
-        <button
+        <Button
           onClick={goNext}
-          className="bg-teal-500 hover:bg-teal-400 text-white font-bold px-10 py-4 rounded-full text-lg transition-all duration-200 shadow-lg w-full max-w-xs"
+          size="lg"
+          className="px-10 py-4 text-lg shadow-lg w-full max-w-xs"
         >
           Continue →
-        </button>
+        </Button>
         <button
           onClick={handleSkipToEnd}
           disabled={saving}
@@ -568,13 +573,14 @@ export default function OnboardingGoalPage() {
       {error && <p className="text-red-400 text-sm text-center mb-4 bg-red-400/10 rounded-lg px-4 py-2">{error}</p>}
 
       <div className="flex flex-col items-center gap-3">
-        <button
+        <Button
           onClick={handleFinish}
           disabled={saving}
-          className="bg-teal-500 hover:bg-teal-400 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold px-10 py-4 rounded-full text-lg transition-all duration-200 shadow-lg w-full max-w-xs"
+          size="lg"
+          className="px-10 py-4 text-lg shadow-lg w-full max-w-xs"
         >
           {saving ? 'Setting up your map…' : 'Start Voting →'}
-        </button>
+        </Button>
         <button
           onClick={handleFinish}
           disabled={saving}

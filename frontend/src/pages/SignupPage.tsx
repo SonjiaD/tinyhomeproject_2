@@ -2,7 +2,7 @@ import { useState, FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useParkingCount } from '../lib/useParkingCount'
-import { PasswordInput } from '../components/ui'
+import { PasswordInput, Button } from '../components/ui'
 
 export default function SignupPage() {
   const { signUp } = useAuth()
@@ -84,11 +84,8 @@ export default function SignupPage() {
               <p className="text-teal-400/60 text-sm mb-8">
                 Click the link in that email to activate your account, then come back here to log in.
               </p>
-              <Link
-                to="/login"
-                className="inline-block bg-teal-500 hover:bg-teal-400 text-white font-bold px-8 py-3 rounded-full transition-all duration-200"
-              >
-                Go to Log In
+              <Link to="/login">
+                <Button size="lg">Go to Log In</Button>
               </Link>
             </div>
           ) : (
@@ -139,13 +136,9 @@ export default function SignupPage() {
                   <p className="text-red-400 text-sm bg-red-400/10 rounded-lg px-4 py-2.5">{error}</p>
                 )}
 
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-teal-500 hover:bg-teal-400 disabled:opacity-60 text-white font-bold py-3.5 rounded-full transition-all duration-200 mt-2"
-                >
+                <Button type="submit" size="lg" loading={loading} className="w-full mt-2">
                   {loading ? 'Creating account…' : 'Create Account'}
-                </button>
+                </Button>
               </form>
 
               <p className="text-teal-300/60 text-sm text-center mt-6">

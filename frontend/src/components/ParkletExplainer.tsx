@@ -30,7 +30,7 @@ export function ParkletExplainer() {
         <button
           onClick={() => setAndPersist(false)}
           className="flex items-center gap-1.5 bg-primary-900 text-white text-xs font-medium
-            px-3 py-2 rounded-full shadow-lg border border-primary-700 hover:bg-primary-800 transition-colors"
+            px-3 py-2 rounded-lg shadow-lg border border-primary-700 hover:bg-primary-800 transition-colors"
         >
           <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <circle cx="12" cy="12" r="9" />
