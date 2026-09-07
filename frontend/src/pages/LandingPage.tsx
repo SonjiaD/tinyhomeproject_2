@@ -601,7 +601,7 @@ export default function LandingPage({ standalone = false }: { standalone?: boole
               onClick={() => go(SLIDE_COUNT - 1, 1)}
               className={`text-sm font-medium transition-colors ${isDark ? 'text-white/70 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
             >
-              Skip intro →
+              Skip intro
             </button>
           )}
           {standalone ? (
@@ -613,7 +613,7 @@ export default function LandingPage({ standalone = false }: { standalone?: boole
                   : 'bg-gray-900/8 hover:bg-gray-900/15 border border-gray-400 text-gray-700'
               }`}
             >
-              ← Back to map
+              Back to map
             </Link>
           ) : (
             /* Log in only. Offering both actions up here split attention between two doors
