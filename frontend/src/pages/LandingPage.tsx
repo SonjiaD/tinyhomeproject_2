@@ -616,24 +616,20 @@ export default function LandingPage({ standalone = false }: { standalone?: boole
               ← Back to map
             </Link>
           ) : (
-            <>
-              <Link
-                to="/login"
-                className={`text-sm font-medium transition-colors ${isDark ? 'text-white/70 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
-              >
-                Log in
-              </Link>
-              <Link
-                to="/signup"
-                className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-all backdrop-blur-sm ${
-                  isDark
-                    ? 'bg-white/10 hover:bg-white/20 border border-white/20 text-white'
-                    : 'bg-gray-900/8 hover:bg-gray-900/15 border border-gray-400 text-gray-700'
-                }`}
-              >
-                Sign up
-              </Link>
-            </>
+            /* Log in only. Offering both actions up here split attention between two doors
+               into the same place; signup belongs at the moment someone is convinced, which is
+               the "Get Started" CTA on the final slide, with the login page's own "Don't have
+               an account?" link as the fallback for anyone who lands here already decided. */
+            <Link
+              to="/login"
+              className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-all backdrop-blur-sm ${
+                isDark
+                  ? 'bg-white/10 hover:bg-white/20 border border-white/20 text-white'
+                  : 'bg-gray-900/8 hover:bg-gray-900/15 border border-gray-400 text-gray-700'
+              }`}
+            >
+              Log in
+            </Link>
           )}
         </div>
       </div>
