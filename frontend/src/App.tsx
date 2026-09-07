@@ -1,6 +1,7 @@
-import { BrowserRouter as Router, Routes, Route, NavLink, Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
 import { AuthGuard } from './components/AuthGuard'
+import { SiteNav } from './components/SiteNav'
 import AboutPage from './pages/AboutPage'
 import SuggestPage from './pages/SuggestPage'
 import ParkingVotePage from './pages/ParkingVotePage'
@@ -11,61 +12,23 @@ import OnboardingGoalPage from './pages/OnboardingGoalPage'
 import ProfilePage from './pages/ProfilePage'
 import { ParkletExplainer } from './components/ParkletExplainer'
 
-const PRE_AUTH_ROUTES = ['/', '/login', '/signup', '/onboarding/goal', '/intro']
+/**
+ * Routes that render no shared header.
+ *
+ * Login, signup and onboarding are single-purpose flows: the auth pages are full-bleed
+ * two-panel layouts with their own Back link, and a nav on onboarding just invites people to
+ * wander off half-configured.
+ *
+ * "/" and "/intro" are here because LandingPage renders its own <SiteNav variant="overlay" />.
+ * The slideshow flips between light and dark slides, and keeping that knowledge inside the
+ * slideshow is what stops slide-theme state leaking into AppShell.
+ */
+const ROUTES_WITHOUT_NAV = ['/login', '/signup', '/onboarding/goal', '/', '/intro']
 
-const navLinks = [
-  // { to: '/home', label: 'Home' },
-  { to: '/parking-vote', label: 'Vote on Parking' },
-  // { to: '/suggest', label: 'Suggest a Location' },
-  { to: '/intro', label: 'Intro' },
-  { to: '/about', label: 'About' },
-  { to: '/profile', label: 'Profile' },
-]
-
-function NavBar() {
+function AppNav() {
   const location = useLocation()
-  const navigate = useNavigate()
-  const { signOut } = useAuth()
-
-  if (PRE_AUTH_ROUTES.includes(location.pathname)) return null
-
-  async function handleSignOut() {
-    await signOut()
-    navigate('/')
-  }
-
-  return (
-    <nav className="bg-primary-900 border-b border-primary-800">
-      <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
-        <Link to="/home" className="text-lg font-semibold text-white tracking-tight">
-          Tiny Home Parklet Siting Tool
-        </Link>
-        <div className="flex items-center gap-1">
-          {navLinks.map(({ to, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                `px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'text-white bg-primary-800'
-                    : 'text-primary-100 hover:text-white hover:bg-primary-800'
-                }`
-              }
-            >
-              {label}
-            </NavLink>
-          ))}
-          <button
-            onClick={handleSignOut}
-            className="ml-3 px-3 py-1.5 rounded-md text-sm font-medium text-primary-300 hover:text-white hover:bg-primary-800 transition-colors"
-          >
-            Log out
-          </button>
-        </div>
-      </div>
-    </nav>
-  )
+  if (ROUTES_WITHOUT_NAV.includes(location.pathname)) return null
+  return <SiteNav variant="solid" />
 }
 
 function MobileBanner() {
@@ -84,7 +47,7 @@ function AppShell() {
   return (
     <div className="h-screen bg-surface-page flex flex-col overflow-hidden">
       <MobileBanner />
-      <NavBar />
+      <AppNav />
       <div id="main-scroll" className="flex-1 min-h-0 flex flex-col overflow-auto">
       <Routes>
         {/* Public routes */}

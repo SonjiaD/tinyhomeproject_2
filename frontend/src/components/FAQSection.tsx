@@ -38,7 +38,7 @@ const faqItems: FAQItem[] = [
         Oakland's housing stock relieves price pressure across the entire market, which over time
         helps everyone, including people at risk of becoming homeless. But the units themselves are
         just housing, for anyone who wants to rent one. Coincidentally, 6,000 is more than the most
-        recently published point-in-time homeless count in 2024.
+        recently published point-in-time homeless count.
       </p>
     ),
   },

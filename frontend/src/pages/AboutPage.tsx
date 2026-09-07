@@ -56,7 +56,10 @@ export default function AboutPage() {
               alt="A tiny yellow home with a white picket fence on an Oakland street"
               className="w-full"
               loading="eager"
-              fetchPriority="high"
+              // Lowercase on purpose: React 18 does not know the camelCase fetchPriority prop
+              // and logs an "unrecognized prop" error, then drops it. Lowercase passes straight
+              // through to the DOM, so the hint actually reaches the browser.
+              {...{ fetchpriority: 'high' }}
             />
           </div>
           <p className="mt-2 text-xs text-gray-400">
@@ -102,7 +105,7 @@ export default function AboutPage() {
         <AboutSection label="The Team">
           <p className="text-gray-600 leading-relaxed">
             This tool was developed by the <strong>Kalyan Lab</strong> at the{' '}
-            <strong>University of British Columbia (UBC)</strong> in 2026, focusing on urban
+            <strong>University of British Columbia (UBC)</strong>, focusing on urban
             analytics, GIS, and equitable urban planning. Our goal is to make complex spatial
             decision-making accessible to community members and planners alike.
           </p>

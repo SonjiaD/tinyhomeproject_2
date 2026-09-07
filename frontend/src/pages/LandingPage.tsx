@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence, type Transition } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
 import { useParkingCount } from '../lib/useParkingCount'
+import { SiteNav } from '../components/SiteNav'
 import { supabase } from '../lib/supabase'
 
 // ── Animated counter hook ─────────────────────────────────────────────────────
@@ -276,7 +277,7 @@ function SlideStats({ active, parkingCount }: { active: boolean; parkingCount: n
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4 mb-10">
           <StatCard value={parkingCount} label="On-street parking spaces" sub="estimated, in Oakland" active={active} delay={0.1} />
           <StatCard value={26251} label="New homes required" sub="by state mandate, by 2031" active={active} delay={0.2} />
-          <StatCard value={3614} label="Homes permitted" sub="through 2025" active={active} delay={0.3} />
+          <StatCard value={3614} label="Homes permitted" sub="to date" active={active} delay={0.3} />
           <StatCard value={17000} label="Units short" sub="at current pace" active={active} delay={0.4} />
         </div>
 
@@ -581,58 +582,15 @@ export default function LandingPage({ standalone = false }: { standalone?: boole
 
   return (
     <div className="fixed inset-0 overflow-hidden">
-      {/* Persistent top bar */}
-      <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4">
-        <span className={`text-sm font-semibold tracking-tight transition-colors ${isDark ? 'text-white/70' : 'text-gray-700'}`}>
-          Tiny Home Parklet Siting Tool
-        </span>
-        {/* People can arrive at this link cold (e.g. from Reddit) with no context for the
-            slides' pace. Keep a way out of the slideshow on every slide, not just the last
-            one, so someone frustrated with it can go read About or jump straight to the map. */}
-        <div className="flex items-center gap-4">
-          <Link
-            to="/about"
-            className={`text-sm font-medium transition-colors ${isDark ? 'text-white/70 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
-          >
-            About
-          </Link>
-          {current < SLIDE_COUNT - 1 && (
-            <button
-              onClick={() => go(SLIDE_COUNT - 1, 1)}
-              className={`text-sm font-medium transition-colors ${isDark ? 'text-white/70 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
-            >
-              Skip intro
-            </button>
-          )}
-          {standalone ? (
-            <Link
-              to="/parking-vote"
-              className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-all backdrop-blur-sm ${
-                isDark
-                  ? 'bg-white/10 hover:bg-white/20 border border-white/20 text-white'
-                  : 'bg-gray-900/8 hover:bg-gray-900/15 border border-gray-400 text-gray-700'
-              }`}
-            >
-              Back to map
-            </Link>
-          ) : (
-            /* Log in only. Offering both actions up here split attention between two doors
-               into the same place; signup belongs at the moment someone is convinced, which is
-               the "Get Started" CTA on the final slide, with the login page's own "Don't have
-               an account?" link as the fallback for anyone who lands here already decided. */
-            <Link
-              to="/login"
-              className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-all backdrop-blur-sm ${
-                isDark
-                  ? 'bg-white/10 hover:bg-white/20 border border-white/20 text-white'
-                  : 'bg-gray-900/8 hover:bg-gray-900/15 border border-gray-400 text-gray-700'
-              }`}
-            >
-              Log in
-            </Link>
-          )}
-        </div>
-      </div>
+      {/* Same nav as every other page. The slideshow flips between light and dark slides,
+          so it takes the overlay variant, which stays transparent and recolours with the
+          slide instead of dropping a solid dark bar onto a light one.
+
+          "Skip intro" used to live here as the only way out of the slideshow mid-way. The
+          nav is that way out now, on every slide, so the button was redundant. "Back to
+          map" went for the same reason: a signed-in visitor has Vote on Parking right
+          there in the nav. */}
+      <SiteNav variant="overlay" isDark={isDark} />
 
       <AnimatePresence initial={false} custom={direction} mode="wait">
         <motion.div
