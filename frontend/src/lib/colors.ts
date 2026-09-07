@@ -27,3 +27,24 @@ export function getRankColor(rank: number): string {
   if (rank <= 400) return colors.rank[3]
   return colors.rank[4]
 }
+
+/**
+ * The two deep surface colours, for the places a Tailwind class cannot reach.
+ *
+ * These mirror `surface.dark` / `surface.darkest` in tailwind.config.js and must stay in sync
+ * with it. Prefer the classes (`bg-surface-dark`, `bg-surface-darkest`) wherever they work;
+ * these exist for the three cases that need a real colour string:
+ *
+ *   - CSS gradients that append an alpha suffix to the colour
+ *   - imperative writes to element.style, where there is no className to set
+ *   - libraries taking a colour value directly, such as Leaflet's pathOptions
+ *
+ * They were previously inline hex literals repeated across five files, which is how three
+ * slightly different darks ended up in the app without anyone choosing them.
+ */
+
+/** Panels and immersive page sections. Deeper than primary-900, which is the nav's colour. */
+export const SURFACE_DARK = '#0f2a2a'
+
+/** Full-bleed immersive backgrounds: the slideshow and the auth pages. */
+export const SURFACE_DARKEST = '#0d2626'

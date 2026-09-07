@@ -77,8 +77,12 @@ export function SiteNav({ variant = 'solid', isDark = true }: SiteNavProps) {
   const overlay = variant === 'overlay'
   const light = overlay && !isDark
 
+  // Both variants must occupy exactly the same box, or moving between the slideshow and any
+  // other page makes the header visibly jump. The overlay carries a *transparent* bottom
+  // border rather than none: a border-b is 1px of layout, so matching the border box is what
+  // actually equalises the height, while the colour keeps the line invisible over a slide.
   const wrapper = overlay
-    ? 'absolute top-0 left-0 right-0 z-50'
+    ? 'absolute top-0 left-0 right-0 z-50 border-b border-transparent'
     : 'bg-primary-900 border-b border-primary-800'
 
   const brand = light ? 'text-gray-800' : 'text-white'
@@ -97,7 +101,9 @@ export function SiteNav({ variant = 'solid', isDark = true }: SiteNavProps) {
 
   return (
     <nav className={wrapper}>
-      <div className={`max-w-6xl mx-auto px-6 flex items-center justify-between ${overlay ? 'py-4' : 'py-3'}`}>
+      {/* py-3 in both variants. Standardising on the solid bar's value means no in-app page's
+          content offset changes; only the slideshow's floating bar tightens slightly. */}
+      <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
         <Link to={user ? '/parking-vote' : '/'} className={`text-sm font-semibold tracking-tight transition-colors ${brand}`}>
           Tiny Home Parklet Siting Tool
         </Link>

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Home, Key, History, Heart, Briefcase, MapPin, Circle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { SURFACE_DARK } from '../lib/colors'
 
 const AGE_RANGES = ['under_18', '18-24', '25-34', '35-44', '45-54', '55-64', '65+', 'prefer_not_to_say']
 const HOUSEHOLD_TYPES = [
@@ -122,7 +123,7 @@ export default function OnboardingGoalPage() {
   const { user, refreshProfile } = useAuth()
   useEffect(() => {
     const el = document.getElementById('main-scroll')
-    if (el) el.style.backgroundColor = '#0f2a2a'
+    if (el) el.style.backgroundColor = SURFACE_DARK
     return () => { if (el) el.style.backgroundColor = '' }
   }, [])
   const [step, setStep] = useState(0) // 0..4
@@ -596,7 +597,7 @@ export default function OnboardingGoalPage() {
   ]
 
   return (
-    <div className="relative min-h-screen shrink-0 flex flex-col items-center justify-center px-6 py-12" style={{ background: '#0f2a2a' }}>
+    <div className="relative min-h-screen shrink-0 flex flex-col items-center justify-center px-6 py-12 bg-surface-dark">
       {/* Persistent concept thumbnail */}
       <div className="hidden sm:flex absolute top-6 right-6 items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-2 pr-4 max-w-xs">
         <img

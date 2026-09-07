@@ -6,6 +6,7 @@ import { useParkingCount } from '../lib/useParkingCount'
 import { SiteNav } from '../components/SiteNav'
 import { Button } from '../components/ui'
 import { supabase } from '../lib/supabase'
+import { SURFACE_DARKEST } from '../lib/colors'
 
 // ── Animated counter hook ─────────────────────────────────────────────────────
 function useCounter(target: number, active: boolean, duration = 1400) {
@@ -161,14 +162,14 @@ function NavArrows({ onPrev, onNext, hasPrev, hasNext, isDark }: {
 // ── Slide 1: Hero ─────────────────────────────────────────────────────────────
 function SlideHero({ onNext }: { onNext: () => void }) {
   return (
-    <div className="relative w-full h-full flex items-center justify-center overflow-hidden" style={{ background: '#0d2626' }}>
+    <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-surface-darkest">
       {/* Background image */}
       <div
         className="absolute inset-0 bg-cover bg-center opacity-20"
         style={{ backgroundImage: "url('/tinyHomeParklet.webp')" }}
       />
       {/* Gradient overlay */}
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, #0d2626 60%, #1a3a3a 100%)' }} />
+      <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${SURFACE_DARKEST} 60%, #1a3a3a 100%)` }} />
 
       <div className="relative z-10 max-w-3xl mx-auto px-10 text-center">
         <motion.div
@@ -336,7 +337,7 @@ const visions = [
 
 function SlideVisions() {
   return (
-    <div className="w-full h-full flex items-center justify-center" style={{ background: '#0f2a2a' }}>
+    <div className="w-full h-full flex items-center justify-center bg-surface-dark">
       <div className="max-w-5xl w-full mx-auto px-10">
         <motion.div
           initial={{ opacity: 0, y: -16 }}
@@ -471,12 +472,12 @@ function SlideHow() {
 // ── Slide 6: CTA ──────────────────────────────────────────────────────────────
 function SlideCTA() {
   return (
-    <div className="relative w-full h-full flex items-center justify-center overflow-hidden" style={{ background: '#0d2626' }}>
+    <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-surface-darkest">
       <div
         className="absolute inset-0 bg-cover bg-center opacity-30"
         style={{ backgroundImage: "url('/tinyHomeParklet.webp')" }}
       />
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, #0d2626cc, #0d2626ee)' }} />
+      <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${SURFACE_DARKEST}cc, ${SURFACE_DARKEST}ee)` }} />
 
       <div className="relative z-10 max-w-2xl mx-auto px-10 text-center">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>

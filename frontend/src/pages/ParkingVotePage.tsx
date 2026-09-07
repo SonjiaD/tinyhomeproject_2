@@ -11,6 +11,7 @@ import { SitePanel } from '../components/SitePanel'
 import { ShareButtons } from '../components/ShareButtons'
 import { ProgressToast } from '../components/ui'
 import { useAuth } from '../contexts/AuthContext'
+import { SURFACE_DARK } from '../lib/colors'
 import {
   POLYGON_URL, BATCH_CHUNK, fetchVoteCounts, fetchTotalYes, fetchMyVotes,
   submitBatch as apiSubmitBatch, deleteBatch as apiDeleteBatch,
@@ -1541,7 +1542,7 @@ export default function ParkingVotePage() {
             return (
               <Polygon
                 positions={polys}
-                pathOptions={{ color: '#0f2a2a', weight: 2, fillOpacity: 0, interactive: false }}
+                pathOptions={{ color: SURFACE_DARK, weight: 2, fillOpacity: 0, interactive: false }}
               />
             )
           })()}

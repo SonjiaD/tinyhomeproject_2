@@ -35,11 +35,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#0d2626' }}>
+    <div className="min-h-screen flex bg-surface-darkest">
       {/* Left panel */}
       <div
-        className="hidden lg:flex lg:w-1/2 flex-col justify-end p-12 relative overflow-hidden"
-        style={{ background: '#0f2a2a' }}
+        className="hidden lg:flex lg:w-1/2 flex-col justify-end p-12 relative overflow-hidden bg-surface-dark"
       >
         <div
           className="absolute inset-0 bg-cover bg-center opacity-20"

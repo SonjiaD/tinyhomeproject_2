@@ -47,6 +47,12 @@ export default {
           page:  '#f8f7f5',
           card:  '#ffffff',
           muted: '#f1efec',
+          // The immersive pages (slideshow, auth, onboarding, map) sit deliberately deeper
+          // than primary-900, which is the nav's colour. These were inline hex literals
+          // scattered across five files; naming them keeps the look and drops the magic
+          // numbers. `dark` is for panels and sections, `darkest` for full-bleed backgrounds.
+          dark:    '#0f2a2a',
+          darkest: '#0d2626',
         },
         border: {
           DEFAULT: '#d8d4cf',
