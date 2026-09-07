@@ -1480,7 +1480,7 @@ export default function ParkingVotePage() {
                 </span>
               </div>
               <div className="flex items-center gap-2 text-xs text-gray-400 border-l border-gray-200 pl-4">
-                <span>{(rawGeojson?.total_spots ?? parkingCount)?.toLocaleString() ?? '—'} total spaces</span>
+                <span>{(rawGeojson?.total_spots ?? parkingCount)?.toLocaleString() ?? '…'} total spaces</span>
                 {zoom < MIN_ZOOM && <span className="text-orange-500 font-medium">· Zoom in to see spaces</span>}
               </div>
             </div>

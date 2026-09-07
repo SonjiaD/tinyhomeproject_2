@@ -92,6 +92,8 @@ export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, on
 
   const isOpen = site !== null
   const commentDirty = comment.trim() !== (savedComment ?? '').trim()
+  /** Whether this user has a saved note here. Their note is never in `notes`. */
+  const hasOwnNote = (savedComment ?? '').trim().length > 0
 
   async function handleUndo() {
     if (!site || myVote === undefined) return
@@ -453,9 +455,19 @@ export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, on
               {notesLoading ? (
                 <p className="text-xs text-gray-400 py-2">Loading notes…</p>
               ) : notes.length === 0 ? (
-                <p className="text-xs text-gray-400 py-2 leading-relaxed">
-                  No notes yet — be the first to say why this spot works, or doesn't.
-                </p>
+                /* This list never contains your own note, so the empty case has to distinguish
+                   "nobody has written one" from "yours is the only one". Telling someone who
+                   just wrote a note to be the first reads as though theirs was not saved. */
+                hasOwnNote ? (
+                  <p className="text-xs text-gray-400 py-2 leading-relaxed">
+                    Yours is the only note on this spot so far. It is shown above, and others
+                    will appear here as more people vote.
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-400 py-2 leading-relaxed">
+                    No notes yet. Be the first to say why this spot works, or doesn't.
+                  </p>
+                )
               ) : (
                 <>
                   <p className="text-[11px] text-gray-400 mb-1">Shown without names.</p>
