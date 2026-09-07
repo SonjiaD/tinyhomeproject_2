@@ -259,8 +259,7 @@ export default function OnboardingGoalPage() {
           type="checkbox"
           checked={neighborhood === NOT_OAKLAND}
           onChange={e => setNeighborhood(e.target.checked ? NOT_OAKLAND : '')}
-          className="w-4 h-4 rounded border-white/20 bg-white/5 text-teal-500
-            focus:ring-2 focus:ring-teal-400 focus:ring-offset-0 cursor-pointer"
+          className="w-4 h-4 accent-teal-500 cursor-pointer"
         />
         <span className="text-sm text-teal-200/70 group-hover:text-teal-200 transition-colors">
           I don't live in Oakland

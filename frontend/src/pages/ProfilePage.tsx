@@ -345,8 +345,7 @@ export default function ProfilePage() {
                 type="checkbox"
                 checked={neighborhood === NOT_OAKLAND}
                 onChange={e => setNeighborhood(e.target.checked ? NOT_OAKLAND : '')}
-                className="w-4 h-4 rounded border-gray-300 text-teal-600
-                  focus:ring-2 focus:ring-teal-500 cursor-pointer"
+                className="w-4 h-4 accent-teal-600 cursor-pointer"
               />
               <span className="text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
                 I don't live in Oakland

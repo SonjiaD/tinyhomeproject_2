@@ -118,14 +118,14 @@ export function SearchableSelect({
     : 'bg-white border-border'
 
   return (
-    <div ref={wrapRef} className="relative" onKeyDown={onKeyDown}>
+    <div ref={wrapRef} onKeyDown={onKeyDown}>
       <button
         type="button"
         disabled={disabled}
         onClick={() => setOpen(o => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className={`w-full text-left border rounded-lg px-4 py-3 pr-10 text-sm
+        className={`relative w-full text-left border rounded-lg px-4 py-3 pr-10 text-sm
           focus:outline-none transition-colors ${trigger}`}
       >
         {value || <span className={dark ? 'text-white/30' : 'text-gray-400'}>{placeholder}</span>}
@@ -142,7 +142,7 @@ export function SearchableSelect({
       </button>
 
       {open && !disabled && (
-        <div className={`absolute z-30 mt-1 w-full border rounded-lg shadow-lg overflow-hidden ${panel}`}>
+        <div className={`mt-1 w-full border rounded-lg shadow-lg overflow-hidden ${panel}`}>
           <input
             ref={inputRef}
             type="text"
