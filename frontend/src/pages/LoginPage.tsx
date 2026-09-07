@@ -53,7 +53,7 @@ export default function LoginPage() {
             Back
           </Link>
 
-          <h1 className="text-3xl font-bold text-white mb-2">Sign in to vote</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Sign in to vote</h1>
           <p className="text-teal-300 mb-8">
             New here? Signing in creates your account. It takes one tap.
           </p>

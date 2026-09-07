@@ -18,7 +18,7 @@ interface Suggestion {
 type PanelState = 'closed' | 'confirm' | 'form'
 
 const inputClass =
-  'w-full bg-white border border-border-input rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-500/50 transition-colors'
+  'w-full bg-white border border-border-input rounded-lg px-4 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:border-teal-500 hover:border-teal-500/50 transition-colors'
 
 function MapClickHandler({
   onMapClick,
@@ -175,7 +175,7 @@ export default function SuggestPage() {
         {loading && (
           <div className="absolute inset-0 z-[3000] flex items-center justify-center bg-white/90">
             <div className="flex flex-col items-center gap-4 text-center px-6">
-              <svg className="w-10 h-10 text-primary-700 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg className="w-10 h-10 text-teal-500 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
               </svg>
@@ -211,7 +211,7 @@ export default function SuggestPage() {
         {/* Success toast */}
         {submitted && (
           <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000]
-            bg-primary-700 text-white rounded-full px-5 py-2 text-sm font-medium shadow-md pointer-events-none">
+            bg-teal-500 text-white rounded-full px-5 py-2 text-sm font-medium shadow-md pointer-events-none">
             Your suggestion has been saved. Thank you!
           </div>
         )}
@@ -337,7 +337,7 @@ export default function SuggestPage() {
               <div className="flex gap-2">
                 <button
                   onClick={handleConfirm}
-                  className="flex-1 rounded-md bg-primary-700 text-white text-sm font-medium py-2 hover:bg-primary-800 transition-colors"
+                  className="flex-1 rounded-md bg-teal-500 text-white text-sm font-medium py-2 hover:bg-teal-400 transition-colors"
                 >
                   Yes, continue
                 </button>
@@ -401,8 +401,8 @@ export default function SuggestPage() {
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="w-full rounded-md bg-primary-700 text-white text-sm font-medium py-2.5
-                  hover:bg-primary-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full rounded-md bg-teal-500 text-white text-sm font-medium py-2.5
+                  hover:bg-teal-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? 'Saving…' : 'Save my suggestion'}
               </button>

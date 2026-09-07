@@ -20,7 +20,7 @@ function AmenityBar({ label, rawMeters, bounds }: AmenityBarProps) {
       </div>
       <div className="w-full bg-gray-100 rounded-full h-2">
         <div
-          className="h-2 rounded-full bg-primary-700 transition-all duration-300"
+          className="h-2 rounded-full bg-teal-500 transition-all duration-300"
           style={{ width: `${Math.round(fill * 100)}%` }}
         />
       </div>
@@ -223,7 +223,7 @@ export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, on
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Community Votes</p>
               <div className="flex gap-4">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-primary-700">{voteTally.yes}</p>
+                  <p className="text-2xl font-bold text-teal-600">{voteTally.yes}</p>
                   <p className="text-xs text-gray-500">Support</p>
                 </div>
                 <div className="text-center">
@@ -284,7 +284,7 @@ export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, on
                   maxLength={500}
                   disabled={myVote === undefined}
                   className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700
-                    placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500
+                    placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400
                     focus:border-transparent resize-none disabled:bg-gray-50 disabled:text-gray-400"
                 />
 
@@ -297,8 +297,8 @@ export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, on
                     <button
                       onClick={handleSaveNote}
                       disabled={savingNote || !commentDirty}
-                      className="rounded-md bg-primary-700 text-white text-sm font-medium px-4 py-1.5
-                        hover:bg-primary-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="rounded-md bg-teal-500 text-white text-sm font-medium px-4 py-1.5
+                        hover:bg-teal-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {savingNote ? 'Saving…' : 'Save note'}
                     </button>

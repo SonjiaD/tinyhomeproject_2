@@ -33,8 +33,23 @@ colours, not shades of one — mixing them arbitrarily is what made the buttons 
 - `teal-400/20` for selected rows
 - `teal-400` for focus rings
 
-**Never** use `primary-*` for something a person clicks, and never use `teal-*` for a large
-background surface.
+**Never** use `primary-*` as the fill, ring or link colour of an accent, and never use `teal-*` for
+a large background surface.
+
+### The surface ramp is not an accent
+
+`primary-100` through `primary-400` as **text and borders sitting on a `primary-900` surface** are
+part of that surface's treatment, not accents. The footer links, the nav items, the map's bottom
+bar, and the slide-over panel headers all use them, and they should keep using them — they are muted
+on purpose so the map and the nav stay quiet behind the content.
+
+The same goes for a control that is deliberately recessive on dark chrome: the parklet explainer's
+map chip, the batch-vote bar's outline button. A dark chip is a *surface* with white text, not an
+accent, and painting it teal would make the map shout.
+
+The test is what the colour is doing, not whether the element is clickable. If it exists to draw the
+eye — a primary button's fill, a focus ring, a link meant to be found, a progress fill, a spinner, a
+selected row — it is teal. If it exists to sit back, it stays in the `primary` ramp.
 
 Dark surfaces beyond the palette live in `src/lib/colors.ts` as `SURFACE_DARK` (`#0f2a2a`) and
 `SURFACE_DARKEST` (`#0d2626`), with matching `surface-dark` / `surface-darkest` Tailwind utilities.
@@ -83,8 +98,9 @@ the entire row jumps taller mid-action. Shortening the label fixes it until the 
 | Level | Classes |
 |---|---|
 | Page h1 | `text-3xl md:text-4xl font-bold` |
-| Landing hero h1 *(sole exception)* | `text-3xl md:text-5xl font-bold` |
+| Landing hero h1 | `text-3xl md:text-5xl font-bold` |
 | Tool header h1 | `text-xl font-semibold` |
+| Status card h1 | `text-2xl font-bold` |
 | Section h2 | `text-xl font-semibold` |
 | Card title h3 | `text-base font-semibold` |
 | Body | `text-sm leading-relaxed` |
@@ -92,9 +108,17 @@ the entire row jumps taller mid-action. Shortening the label fixes it until the 
 | Meta, captions, labels | `text-xs` |
 | Eyebrow | the `SectionLabel` component |
 
-**Tool header** is a real tier, not a violation. The map and Suggest pages put their heading in a
-thin bar above a full-bleed map; a `text-4xl` heading there would crowd out the thing the page
-exists to show. Content pages that scroll use the page h1 scale.
+Four h1 tiers, each with a clear trigger — this is a scale, not a licence to pick a size per page.
+The drift being corrected was that pages of the *same* kind disagreed: the profile and login pages
+used `text-3xl` while the About, Privacy and Terms pages used `text-3xl md:text-4xl` for exactly the
+same job.
+
+- **Page h1** — any content page that scrolls. The default; reach for this first.
+- **Landing hero** — the marketing slideshow only.
+- **Tool header** — a heading in a thin bar above a full-bleed map (the map and Suggest pages). A
+  `text-4xl` heading there crowds out the thing the page exists to show.
+- **Status card** — a transient, centred `max-w-sm` card such as the auth callback failure. The page
+  scale wraps to three cramped lines in a column that narrow.
 
 ---
 

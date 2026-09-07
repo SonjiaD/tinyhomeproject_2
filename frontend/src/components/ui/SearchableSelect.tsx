@@ -135,7 +135,7 @@ export function SearchableSelect({
       : 'bg-gray-50 border-border-input text-gray-400 cursor-not-allowed'
     : dark
       ? 'bg-white/5 border-white/10 text-white hover:border-white/20 focus:border-teal-400'
-      : 'bg-white border-border-input text-gray-700 hover:border-primary-500/50 focus:border-primary-500'
+      : 'bg-white border-border-input text-gray-700 hover:border-teal-500/50 focus:border-teal-500'
 
   const panel = dark
     ? 'bg-primary-900 border-white/10'
@@ -182,7 +182,7 @@ export function SearchableSelect({
               dark
                 ? selected ? 'bg-teal-400/20 text-teal-200 font-medium'
                   : active ? 'bg-white/10 text-white' : 'text-teal-100/70'
-                : selected ? 'bg-primary-50 text-primary-800 font-medium'
+                : selected ? 'bg-teal-50 text-teal-800 font-medium'
                   : active ? 'bg-surface-muted text-gray-700' : 'text-gray-700'
             }`}
           >

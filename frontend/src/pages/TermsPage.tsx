@@ -1,5 +1,5 @@
 import { Footer } from '../components/Footer'
-import { Card, SectionLabel } from '../components/ui'
+import { Card, SectionLabel, PageLayout } from '../components/ui'
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -28,7 +28,8 @@ export default function TermsPage() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-12 space-y-6 w-full flex-1">
+      <PageLayout maxWidth="lg" className="flex-1">
+        <div className="space-y-6">
         <Section label="What this is">
           <p className="text-gray-600 leading-relaxed">
             A research tool run by the <strong>Kalyan Lab</strong> at the{' '}
@@ -95,7 +96,8 @@ export default function TermsPage() {
             can ask for a copy of your data or for your account to be deleted at any time.
           </p>
         </Section>
-      </div>
+        </div>
+      </PageLayout>
 
       <Footer />
     </div>

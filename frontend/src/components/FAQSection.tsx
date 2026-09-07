@@ -55,20 +55,20 @@ const faqItems: FAQItem[] = [
         </p>
         <ul className="space-y-1 text-sm">
           <li className="flex items-start gap-2">
-            <span className="text-primary-500 mt-0.5 shrink-0">-</span>
+            <span className="text-teal-500 mt-0.5 shrink-0">-</span>
             City-owned and rented
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-primary-500 mt-0.5 shrink-0">-</span>
+            <span className="text-teal-500 mt-0.5 shrink-0">-</span>
             Private developer with a city concession
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-primary-500 mt-0.5 shrink-0">-</span>
+            <span className="text-teal-500 mt-0.5 shrink-0">-</span>
             Individual occupant who owns the home and pays a "lot lease" to the city (the
             mobilehome/RV park model)
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-primary-500 mt-0.5 shrink-0">-</span>
+            <span className="text-teal-500 mt-0.5 shrink-0">-</span>
             Or maybe you have another idea?
           </li>
         </ul>
@@ -107,20 +107,20 @@ const faqItems: FAQItem[] = [
         </p>
         <ul className="space-y-2 text-sm mb-3">
           <li className="flex items-start gap-2">
-            <span className="text-primary-500 mt-0.5 shrink-0">-</span>
+            <span className="text-teal-500 mt-0.5 shrink-0">-</span>
             <span>
               <span className="font-medium">6,000 units:</span> ~$1.6 million/year in new municipal
               revenue ($72M gross rents × 1.395% = $1,004,400 BLT; 6,000 × $101 = $606,000 RAP fees)
             </span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-primary-500 mt-0.5 shrink-0">-</span>
+            <span className="text-teal-500 mt-0.5 shrink-0">-</span>
             <span>
               <span className="font-medium">18,000 units:</span> ~$4.8 million/year
             </span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-primary-500 mt-0.5 shrink-0">-</span>
+            <span className="text-teal-500 mt-0.5 shrink-0">-</span>
             <span>
               <span className="font-medium">30,000 units:</span> ~$8.1 million/year
             </span>
@@ -202,7 +202,7 @@ function FAQItem({ question, answer }: FAQItem) {
       >
         <span className="font-medium text-gray-800">{question}</span>
         <svg
-          className={`shrink-0 w-5 h-5 text-primary-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`shrink-0 w-5 h-5 text-teal-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"

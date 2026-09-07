@@ -169,11 +169,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <PageLayout>
+    <PageLayout maxWidth="lg">
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div className="flex items-start justify-between gap-4 mb-10">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-1">Your Profile</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-1">Your Profile</h1>
             <p className="text-gray-500 mt-1">Update your goal and preferences any time.</p>
           </div>
           <div className="shrink-0 pt-1.5 text-sm font-medium">

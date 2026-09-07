@@ -46,13 +46,13 @@ export function ParkletExplainer() {
             className="w-12 h-12 rounded-lg object-cover shrink-0"
           />
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-primary-700 leading-none mb-1">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-teal-600 leading-none mb-1">
               Tiny Home Parklet
             </p>
             <p className="text-[11px] text-gray-500 leading-snug">
               A factory-built home, legally permitted onto an Oakland parking space.
             </p>
-            <Link to="/about" className="block text-[11px] font-medium text-primary-700 hover:text-primary-800 mt-0.5">
+            <Link to="/about" className="block text-[11px] font-medium text-teal-600 hover:text-teal-500 mt-0.5">
               Learn more ›
             </Link>
           </div>

@@ -1,5 +1,5 @@
 import { Footer } from '../components/Footer'
-import { Card, SectionLabel } from '../components/ui'
+import { Card, SectionLabel, PageLayout } from '../components/ui'
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -33,7 +33,8 @@ export default function PrivacyPage() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-12 space-y-6 w-full flex-1">
+      <PageLayout maxWidth="lg" className="flex-1">
+        <div className="space-y-6">
         <Section label="Who runs this">
           <p className="text-gray-600 leading-relaxed">
             This tool is operated by the <strong>Kalyan Lab</strong> at the{' '}
@@ -130,7 +131,8 @@ export default function PrivacyPage() {
             active research project, it is worth re-reading if you return after a long gap.
           </p>
         </Section>
-      </div>
+        </div>
+      </PageLayout>
 
       <Footer />
     </div>
