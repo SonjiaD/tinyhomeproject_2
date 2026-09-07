@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button } from '../components/ui'
+import { Button, SearchableSelect } from '../components/ui'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Home, Key, History, Heart, Briefcase, MapPin, Circle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { NEIGHBORHOODS, NOT_OAKLAND } from '../lib/neighborhoods'
 import { SURFACE_DARK } from '../lib/colors'
 
 const AGE_RANGES = ['under_18', '18-24', '25-34', '35-44', '45-54', '55-64', '65+', 'prefer_not_to_say']
@@ -78,39 +79,6 @@ const OWNERSHIP_OPTIONS = [
 ]
 
 // Source: City of Oakland Open Data portal — data.oaklandca.gov/resource/gwm6-hyga.geojson
-const NEIGHBORHOODS = [
-  "Acorn/ Acorn Industrial", "Adams Point", "Allendale", "Arroyo Viejo",
-  "Bancroft Business/ Havenscourt", "Bartlett", "Bella Vista", "Brookfield Village",
-  "Bushrod", "Caballo Hills", "Castlemont", "Chabot Park",
-  "Chinatown", "Civic Center", "Claremont", "Clawson",
-  "Cleveland Heights", "Clinton", "Coliseum", "Coliseum Industrial",
-  "Columbia Gardens", "Cox", "Crestmont", "Crocker Highland",
-  "Dimond", "Downtown", "Durant Manor", "East Peralta",
-  "Eastmont", "Eastmont Hills", "Elmhurst Park", "Fairfax",
-  "Fairfax Business/ Wentworth/ Holland", "Fairview Park", "Fitchburg", "Foothill Square",
-  "Forestland", "Fremont", "Frick", "Fruitvale Station",
-  "Gaskill", "Glen Highlands", "Glenview", "Golden Gate",
-  "Golf Links", "Grand Lake", "Harrington", "Hawthorne",
-  "Hegenberger", "Highland", "Highland Terrace", "Hiller Highlands",
-  "Hoover/ Foster", "Iveywood", "Ivy Hill", "Jefferson",
-  "Lakeshore", "Lakewide", "Las Palmas", "Laurel",
-  "Leona Heights", "Lincoln Highlands", "Lockwood Tevis", "Longfellow",
-  "Lynn/ Highland Park", "Maxwell Park", "McClymonds", "Melrose",
-  "Merritt", "Merriwood", "Mills College", "Millsmont",
-  "Montclair", "Montclair Business", "Mosswood", "North Kennedy Tract",
-  "North Stonehurst", "Northgate", "Oak Center", "Oak Tree",
-  "Oakland Ave/ Harrison St", "Oakmore", "Old City/ Produce & Waterfront", "Panoramic Hill",
-  "Paradise Park", "Patten", "Peralta/ Hacienda", "Peralta/ Laney",
-  "Piedmont Avenue", "Piedmont Pines", "Pill Hill", "Prescott",
-  "Produce & Waterfront", "Ralph Bunche", "Rancho San Antonio", "Redwood Heights",
-  "Reservoir Hill/ Meadow Brook", "Rockridge", "San Pablo Gateway", "Santa Fe",
-  "Sausal Creek", "Seminary", "Sequoyah", "Shafter",
-  "Sheffield Village", "Shepherd Canyon", "Skyline - Hillcrest Estates", "Sobrante Park",
-  "South Kennedy Tract", "South Prescott", "South Stonehurst", "St. Elizabeth",
-  "Temescal", "Toler Heights", "Trestle Glen", "Tuxedo",
-  "Upper Dimond", "Upper Laurel", "Upper Peralta Creek/ Bartlett", "Upper Rockridge",
-  "Waverly", "Webster", "Woodland", "Woodminster",
-]
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? '100%' : '-100%', opacity: 0 }),
@@ -130,7 +98,6 @@ export default function OnboardingGoalPage() {
   const [dir, setDir] = useState(1)
   const [goal, setGoal] = useState<number | null>(null)
   const [neighborhood, setNeighborhood] = useState('')
-  const [neighborhoodSearch, setNeighborhoodSearch] = useState('')
   const [roles, setRoles] = useState<string[]>([])
   const [ownershipModel, setOwnershipModel] = useState<string | null>(null)
   const [ownershipOther, setOwnershipOther] = useState('')
@@ -141,9 +108,6 @@ export default function OnboardingGoalPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  const filteredNeighborhoods = neighborhoodSearch.length > 0
-    ? NEIGHBORHOODS.filter(n => n.toLowerCase().includes(neighborhoodSearch.toLowerCase()))
-    : NEIGHBORHOODS
 
   function toggleRole(value: string) {
     setRoles(prev => prev.includes(value) ? prev.filter(r => r !== value) : [...prev, value])
@@ -191,17 +155,6 @@ export default function OnboardingGoalPage() {
     }
   }
 
-  async function handleSkipToEnd() {
-    if (goal === null) return
-    setSaving(true)
-    const { error } = await saveProfile()
-    setSaving(false)
-    if (error) {
-      setError('Could not save. Please try again.')
-    } else {
-      navigate('/parking-vote')
-    }
-  }
 
   const steps = [
     // Step 1 — Goal
@@ -264,14 +217,14 @@ export default function OnboardingGoalPage() {
 
       {error && <p className="text-red-400 text-sm text-center mb-4 bg-red-400/10 rounded-lg px-4 py-2">{error}</p>}
 
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex items-center justify-center gap-3 w-full max-w-md mx-auto">
         <Button
           onClick={goNext}
           disabled={goal === null}
           size="lg"
-          className="px-10 py-4 text-lg shadow-lg"
+          className="flex-1 py-4 text-base shadow-lg"
         >
-          {goal ? 'Continue →' : 'Choose a goal to continue'}
+          {goal ? 'Continue' : 'Choose a goal to continue'}
         </Button>
       </div>
     </div>,
@@ -288,72 +241,43 @@ export default function OnboardingGoalPage() {
         </p>
       </div>
 
-      <input
-        type="text"
+      {/* 124 options: a searchable dropdown, not a wall of chips. */}
+      <SearchableSelect
+        options={NEIGHBORHOODS}
+        value={neighborhood === NOT_OAKLAND ? '' : neighborhood}
+        onChange={setNeighborhood}
         placeholder="Search neighborhoods…"
-        value={neighborhoodSearch}
-        onChange={e => setNeighborhoodSearch(e.target.value)}
-        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-teal-400 focus:bg-white/10 transition-all mb-4 text-sm"
-        autoFocus
+        variant="dark"
+        disabled={neighborhood === NOT_OAKLAND}
       />
 
-      <div className="flex flex-wrap gap-2 mb-6">
-        {neighborhoodSearch.length > 0 &&
-          !NEIGHBORHOODS.some(n => n.toLowerCase() === neighborhoodSearch.toLowerCase()) && (
-          <button
-            key="__custom__"
-            onClick={() => { setNeighborhood(neighborhoodSearch); setNeighborhoodSearch(neighborhoodSearch) }}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150 focus:outline-none ${
-              neighborhood === neighborhoodSearch
-                ? 'border-teal-400 bg-teal-400/20 text-teal-300'
-                : 'border-teal-500/40 bg-teal-500/10 text-teal-300/80 hover:border-teal-400 hover:text-teal-300'
-            }`}
-          >
-            + Use "{neighborhoodSearch}"
-          </button>
-        )}
-        {filteredNeighborhoods.map(n => (
-          <button
-            key={n}
-            onClick={() => setNeighborhood(n)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150 focus:outline-none ${
-              neighborhood === n
-                ? 'border-teal-400 bg-teal-400/20 text-teal-300'
-                : 'border-white/10 bg-white/5 text-teal-200/60 hover:border-white/20 hover:text-teal-200'
-            }`}
-          >
-            {n}
-          </button>
-        ))}
-      </div>
-
-      {neighborhood && neighborhood !== 'not-oakland' && (
-        <p className="text-teal-400 text-sm mb-4 flex items-center gap-1.5">
-          <svg viewBox="0 0 20 20" className="w-4 h-4" fill="currentColor">
-            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-          </svg>
-          {neighborhood} selected
-        </p>
-      )}
-
-      <div className="flex flex-col items-center gap-3">
+      {/* Deliberately outside the dropdown. Someone who lives elsewhere should not have to
+          search a list of Oakland neighbourhoods to say they are not in Oakland. The two are
+          mutually exclusive, so each clears the other. */}
+      <label className="mt-4 mb-6 flex items-center gap-3 cursor-pointer group w-fit">
+        <input
+          type="checkbox"
+          checked={neighborhood === NOT_OAKLAND}
+          onChange={e => setNeighborhood(e.target.checked ? NOT_OAKLAND : '')}
+          className="w-4 h-4 rounded border-white/20 bg-white/5 text-teal-500
+            focus:ring-2 focus:ring-teal-400 focus:ring-offset-0 cursor-pointer"
+        />
+        <span className="text-sm text-teal-200/70 group-hover:text-teal-200 transition-colors">
+          I don't live in Oakland
+        </span>
+      </label>
+      <div className="flex items-center justify-center gap-3 w-full max-w-md mx-auto">
+        <Button onClick={goBack} variant="subtle" size="lg" className="flex-1 py-4 text-base shadow-lg">
+          Back
+        </Button>
         <Button
           onClick={goNext}
           disabled={!neighborhood}
           size="lg"
-          className="px-10 py-4 text-lg shadow-lg w-full max-w-xs"
+          className="flex-1 py-4 text-base shadow-lg"
         >
-          Continue →
+          Continue
         </Button>
-        <button
-          onClick={() => { setNeighborhood('not-oakland'); goNext() }}
-          className="text-teal-300/50 hover:text-teal-300 text-sm transition-colors"
-        >
-          I don't live in Oakland. Skip
-        </button>
-        <button onClick={goBack} className="text-teal-400/40 hover:text-teal-400 text-sm transition-colors">
-          ← Back
-        </button>
       </div>
     </div>,
 
@@ -392,24 +316,13 @@ export default function OnboardingGoalPage() {
 
       {error && <p className="text-red-400 text-sm text-center mb-4 bg-red-400/10 rounded-lg px-4 py-2">{error}</p>}
 
-      <div className="flex flex-col items-center gap-3">
-        <Button
-          onClick={goNext}
-          size="lg"
-          className="px-10 py-4 text-lg shadow-lg w-full max-w-xs"
-        >
-          Continue →
+      <div className="flex items-center justify-center gap-3 w-full max-w-md mx-auto">
+        <Button onClick={goBack} variant="subtle" size="lg" className="flex-1 py-4 text-base shadow-lg">
+          Back
         </Button>
-        <button
-          onClick={handleSkipToEnd}
-          disabled={saving}
-          className="text-teal-300/50 hover:text-teal-300 text-sm transition-colors disabled:opacity-40"
-        >
-          Skip for now
-        </button>
-        <button onClick={goBack} className="text-teal-400/40 hover:text-teal-400 text-sm transition-colors">
-          ← Back
-        </button>
+        <Button onClick={goNext} size="lg" className="flex-1 py-4 text-base shadow-lg">
+          Continue
+        </Button>
       </div>
     </div>,
 
@@ -468,24 +381,13 @@ export default function OnboardingGoalPage() {
 
       {error && <p className="text-red-400 text-sm text-center mb-4 bg-red-400/10 rounded-lg px-4 py-2">{error}</p>}
 
-      <div className="flex flex-col items-center gap-3">
-        <Button
-          onClick={goNext}
-          size="lg"
-          className="px-10 py-4 text-lg shadow-lg w-full max-w-xs"
-        >
-          Continue →
+      <div className="flex items-center justify-center gap-3 w-full max-w-md mx-auto">
+        <Button onClick={goBack} variant="subtle" size="lg" className="flex-1 py-4 text-base shadow-lg">
+          Back
         </Button>
-        <button
-          onClick={handleSkipToEnd}
-          disabled={saving}
-          className="text-teal-300/50 hover:text-teal-300 text-sm transition-colors disabled:opacity-40"
-        >
-          Skip for now
-        </button>
-        <button onClick={goBack} className="text-teal-400/40 hover:text-teal-400 text-sm transition-colors">
-          ← Back
-        </button>
+        <Button onClick={goNext} size="lg" className="flex-1 py-4 text-base shadow-lg">
+          Continue
+        </Button>
       </div>
     </div>,
 
@@ -573,25 +475,18 @@ export default function OnboardingGoalPage() {
 
       {error && <p className="text-red-400 text-sm text-center mb-4 bg-red-400/10 rounded-lg px-4 py-2">{error}</p>}
 
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex items-center justify-center gap-3 w-full max-w-md mx-auto">
+        <Button onClick={goBack} variant="subtle" size="lg" disabled={saving} className="flex-1 py-4 text-base shadow-lg">
+          Back
+        </Button>
         <Button
           onClick={handleFinish}
           disabled={saving}
           size="lg"
-          className="px-10 py-4 text-lg shadow-lg w-full max-w-xs"
+          className="flex-1 py-4 text-base shadow-lg"
         >
-          {saving ? 'Setting up your map…' : 'Start Voting →'}
+          {saving ? 'Setting up your map…' : 'Start Voting'}
         </Button>
-        <button
-          onClick={handleFinish}
-          disabled={saving}
-          className="text-teal-300/50 hover:text-teal-300 text-sm transition-colors disabled:opacity-40"
-        >
-          Skip for now
-        </button>
-        <button onClick={goBack} className="text-teal-400/40 hover:text-teal-400 text-sm transition-colors">
-          ← Back
-        </button>
       </div>
     </div>,
   ]

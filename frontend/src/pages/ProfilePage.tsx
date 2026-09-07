@@ -3,7 +3,8 @@ import { motion } from 'framer-motion'
 import { Home, Key, History, Heart, Briefcase, MapPin, Circle } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
-import { SectionLabel, PageLayout } from '../components/ui'
+import { NEIGHBORHOODS, NOT_OAKLAND } from '../lib/neighborhoods'
+import { SectionLabel, PageLayout, SearchableSelect } from '../components/ui'
 
 const GOALS = [
   {
@@ -73,46 +74,12 @@ const RANGE_LABELS: Record<string, string> = {
 const rangeLabel = (v: string) => RANGE_LABELS[v] ?? v.replace(/-/g, '–')
 
 // Source: City of Oakland Open Data portal — data.oaklandca.gov/resource/gwm6-hyga.geojson
-const NEIGHBORHOODS = [
-  "Acorn/ Acorn Industrial", "Adams Point", "Allendale", "Arroyo Viejo",
-  "Bancroft Business/ Havenscourt", "Bartlett", "Bella Vista", "Brookfield Village",
-  "Bushrod", "Caballo Hills", "Castlemont", "Chabot Park",
-  "Chinatown", "Civic Center", "Claremont", "Clawson",
-  "Cleveland Heights", "Clinton", "Coliseum", "Coliseum Industrial",
-  "Columbia Gardens", "Cox", "Crestmont", "Crocker Highland",
-  "Dimond", "Downtown", "Durant Manor", "East Peralta",
-  "Eastmont", "Eastmont Hills", "Elmhurst Park", "Fairfax",
-  "Fairfax Business/ Wentworth/ Holland", "Fairview Park", "Fitchburg", "Foothill Square",
-  "Forestland", "Fremont", "Frick", "Fruitvale Station",
-  "Gaskill", "Glen Highlands", "Glenview", "Golden Gate",
-  "Golf Links", "Grand Lake", "Harrington", "Hawthorne",
-  "Hegenberger", "Highland", "Highland Terrace", "Hiller Highlands",
-  "Hoover/ Foster", "Iveywood", "Ivy Hill", "Jefferson",
-  "Lakeshore", "Lakewide", "Las Palmas", "Laurel",
-  "Leona Heights", "Lincoln Highlands", "Lockwood Tevis", "Longfellow",
-  "Lynn/ Highland Park", "Maxwell Park", "McClymonds", "Melrose",
-  "Merritt", "Merriwood", "Mills College", "Millsmont",
-  "Montclair", "Montclair Business", "Mosswood", "North Kennedy Tract",
-  "North Stonehurst", "Northgate", "Oak Center", "Oak Tree",
-  "Oakland Ave/ Harrison St", "Oakmore", "Old City/ Produce & Waterfront", "Panoramic Hill",
-  "Paradise Park", "Patten", "Peralta/ Hacienda", "Peralta/ Laney",
-  "Piedmont Avenue", "Piedmont Pines", "Pill Hill", "Prescott",
-  "Produce & Waterfront", "Ralph Bunche", "Rancho San Antonio", "Redwood Heights",
-  "Reservoir Hill/ Meadow Brook", "Rockridge", "San Pablo Gateway", "Santa Fe",
-  "Sausal Creek", "Seminary", "Sequoyah", "Shafter",
-  "Sheffield Village", "Shepherd Canyon", "Skyline - Hillcrest Estates", "Sobrante Park",
-  "South Kennedy Tract", "South Prescott", "South Stonehurst", "St. Elizabeth",
-  "Temescal", "Toler Heights", "Trestle Glen", "Tuxedo",
-  "Upper Dimond", "Upper Laurel", "Upper Peralta Creek/ Bartlett", "Upper Rockridge",
-  "Waverly", "Webster", "Woodland", "Woodminster",
-]
 
 export default function ProfilePage() {
   const { user, profile, refreshProfile } = useAuth()
   const [goal, setGoal] = useState<number | null>(null)
   const [roles, setRoles] = useState<string[]>([])
   const [neighborhood, setNeighborhood] = useState('')
-  const [neighborhoodSearch, setNeighborhoodSearch] = useState('')
   const [ownershipModel, setOwnershipModel] = useState<string | null>(null)
   const [ownershipOther, setOwnershipOther] = useState('')
   const [occupation, setOccupation] = useState('')
@@ -141,7 +108,6 @@ export default function ProfilePage() {
     if (profile.roles) setRoles(profile.roles)
     if (profile.neighborhood) {
       setNeighborhood(profile.neighborhood)
-      setNeighborhoodSearch(profile.neighborhood === 'not-oakland' ? '' : profile.neighborhood)
     }
     if (profile.ownership_model) setOwnershipModel(profile.ownership_model)
     if (profile.ownership_other) setOwnershipOther(profile.ownership_other)
@@ -197,9 +163,6 @@ export default function ProfilePage() {
   // Flush a pending debounced save on unmount so a quick edit-then-navigate isn't lost.
   useEffect(() => () => { mountedRef.current = false; pendingSaveRef.current?.() }, [])
 
-  const filteredNeighborhoods = neighborhoodSearch.length > 0
-    ? NEIGHBORHOODS.filter(n => n.toLowerCase().includes(neighborhoodSearch.toLowerCase()))
-    : NEIGHBORHOODS
 
   function toggleRole(value: string) {
     setRoles(prev => prev.includes(value) ? prev.filter(r => r !== value) : [...prev, value])
@@ -364,69 +327,32 @@ export default function ProfilePage() {
           <SectionLabel className="mb-1">Your Neighborhood</SectionLabel>
           <p className="text-gray-400 text-sm mb-4">Which Oakland neighborhood do you most want to see this happen in?</p>
 
-          {/* Always-visible selected badge */}
-          {neighborhood && neighborhood !== 'not-oakland' && (
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-gray-400 text-xs font-medium uppercase tracking-wider">Selected:</span>
-              <span className="px-3 py-1 rounded-full text-xs font-medium border border-teal-500 bg-teal-50 text-teal-700">
-                {neighborhood}
+          {/* Same searchable dropdown as onboarding, light variant. Previously 124 chips in a
+              wrapping cloud, which is unreadable at that length. */}
+          <div className="max-w-sm">
+            <SearchableSelect
+              options={NEIGHBORHOODS}
+              value={neighborhood === NOT_OAKLAND ? '' : neighborhood}
+              onChange={setNeighborhood}
+              placeholder="Search neighborhoods…"
+              disabled={neighborhood === NOT_OAKLAND}
+            />
+
+            {/* Outside the dropdown on purpose: saying you are not in Oakland should not
+                require searching a list of Oakland neighbourhoods. */}
+            <label className="mt-3 flex items-center gap-3 cursor-pointer group w-fit">
+              <input
+                type="checkbox"
+                checked={neighborhood === NOT_OAKLAND}
+                onChange={e => setNeighborhood(e.target.checked ? NOT_OAKLAND : '')}
+                className="w-4 h-4 rounded border-gray-300 text-teal-600
+                  focus:ring-2 focus:ring-teal-500 cursor-pointer"
+              />
+              <span className="text-sm text-gray-600 group-hover:text-gray-800 transition-colors">
+                I don't live in Oakland
               </span>
-              <button
-                onClick={() => { setNeighborhood(''); setNeighborhoodSearch('') }}
-                className="text-gray-400 hover:text-gray-600 text-xs transition-colors"
-              >
-                ✕ Clear
-              </button>
-            </div>
-          )}
-
-          <input
-            type="text"
-            placeholder="Search neighborhoods…"
-            value={neighborhoodSearch}
-            onChange={e => setNeighborhoodSearch(e.target.value)}
-            className="w-full max-w-sm bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-800 placeholder-gray-400 focus:outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400 transition-all mb-3 text-sm"
-          />
-
-          <div className="flex flex-wrap gap-2">
-            {neighborhoodSearch.length > 0 &&
-              !NEIGHBORHOODS.some(n => n.toLowerCase() === neighborhoodSearch.toLowerCase()) && (
-              <button
-                onClick={() => { setNeighborhood(neighborhoodSearch); setNeighborhoodSearch(neighborhoodSearch) }}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150 focus:outline-none ${
-                  neighborhood === neighborhoodSearch
-                    ? 'border-teal-500 bg-teal-50 text-teal-700'
-                    : 'border-teal-300 bg-white text-teal-600 hover:border-teal-500 hover:bg-teal-50'
-                }`}
-              >
-                + Use "{neighborhoodSearch}"
-              </button>
-            )}
-            {filteredNeighborhoods.map(n => (
-              <button
-                key={n}
-                onClick={() => setNeighborhood(n)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150 focus:outline-none ${
-                  neighborhood === n
-                    ? 'border-teal-500 bg-teal-50 text-teal-700'
-                    : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-800'
-                }`}
-              >
-                {n}
-              </button>
-            ))}
+            </label>
           </div>
-
-          <button
-            onClick={() => { setNeighborhood('not-oakland'); setNeighborhoodSearch('') }}
-            className={`mt-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-150 focus:outline-none ${
-              neighborhood === 'not-oakland'
-                ? 'border-teal-500 bg-teal-50 text-teal-700'
-                : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-800'
-            }`}
-          >
-            I don't live in Oakland
-          </button>
         </section>
 
         {/* About You (demographics) */}
