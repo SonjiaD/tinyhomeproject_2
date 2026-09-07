@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Link } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { AuthGuard } from './components/AuthGuard'
 import { SiteNav } from './components/SiteNav'
@@ -31,14 +31,41 @@ function AppNav() {
   return <SiteNav variant="solid" />
 }
 
-function MobileBanner() {
+/**
+ * Desktop-only notice, shown on the voting map alone.
+ *
+ * This used to cover every page at every route, with no way past it, so anyone opening a
+ * shared link on a phone hit a wall and could not read About, sign up, or see the project at
+ * all. Most traffic from a shared link is mobile, so that was turning away the majority of
+ * visitors before they saw anything.
+ *
+ * The map genuinely does need a large screen: selecting spots relies on rectangle, circle and
+ * freehand paint tools plus a side panel. So the gate stays for /parking-vote and nothing
+ * else. Everyone can still read the pitch and create an account on a phone, then vote later.
+ */
+function MapDesktopNotice() {
   return (
     <div className="md:hidden fixed inset-0 z-[99999] bg-primary-900 flex flex-col items-center justify-center p-8 text-center">
       <div className="text-5xl mb-5">🖥️</div>
-      <h2 className="text-white text-xl font-bold mb-3">Best Experienced on Desktop</h2>
-      <p className="text-primary-200 text-sm leading-relaxed max-w-xs">
-        This mapping tool is designed for desktop browsers. Please open it on a laptop or computer for the full experience.
+      <h2 className="text-white text-xl font-bold mb-3">The map needs a bigger screen</h2>
+      <p className="text-primary-200 text-sm leading-relaxed max-w-xs mb-8">
+        Choosing parking spots uses drawing tools that need room to work, so voting is desktop
+        only for now. Everything else works here.
       </p>
+      <div className="flex flex-col gap-3 w-full max-w-xs">
+        <Link
+          to="/about"
+          className="bg-teal-500 hover:bg-teal-400 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+        >
+          Read about the project
+        </Link>
+        <Link
+          to="/intro"
+          className="text-primary-200 hover:text-white text-sm font-medium px-6 py-2 transition-colors"
+        >
+          Back to the intro
+        </Link>
+      </div>
     </div>
   )
 }
@@ -46,7 +73,6 @@ function MobileBanner() {
 function AppShell() {
   return (
     <div className="h-screen bg-surface-page flex flex-col overflow-hidden">
-      <MobileBanner />
       <AppNav />
       <div id="main-scroll" className="flex-1 min-h-0 flex flex-col overflow-auto">
       <Routes>
@@ -63,7 +89,7 @@ function AppShell() {
         {/* Authenticated app routes */}
         <Route path="/home" element={<Navigate to="/parking-vote" replace />} />
         <Route path="/suggest" element={<AuthGuard><SuggestPage /></AuthGuard>} />
-        <Route path="/parking-vote" element={<AuthGuard><ParkingVotePage /></AuthGuard>} />
+        <Route path="/parking-vote" element={<AuthGuard><MapDesktopNotice /><ParkingVotePage /></AuthGuard>} />
         <Route path="/profile" element={<AuthGuard><ProfilePage /></AuthGuard>} />
       </Routes>
       </div>
