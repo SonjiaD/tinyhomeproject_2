@@ -221,8 +221,7 @@ export default function OnboardingGoalPage() {
         <Button
           onClick={goNext}
           disabled={goal === null}
-          size="lg"
-          className="flex-1 py-4 text-base shadow-lg"
+          className="flex-1"
         >
           {goal ? 'Continue' : 'Choose a goal to continue'}
         </Button>
@@ -272,14 +271,13 @@ export default function OnboardingGoalPage() {
         </label>
 
         <div className="flex items-center justify-center gap-3">
-          <Button onClick={goBack} variant="subtle" size="lg" className="flex-1 py-4 text-base shadow-lg">
+          <Button onClick={goBack} variant="subtle" className="flex-1">
             Back
           </Button>
           <Button
             onClick={goNext}
             disabled={!neighborhood}
-            size="lg"
-            className="flex-1 py-4 text-base shadow-lg"
+            className="flex-1"
           >
             Continue
           </Button>
@@ -323,10 +321,10 @@ export default function OnboardingGoalPage() {
       {error && <p className="text-red-400 text-sm text-center mb-4 bg-red-400/10 rounded-lg px-4 py-2">{error}</p>}
 
       <div className="flex items-center justify-center gap-3 w-full max-w-md mx-auto">
-        <Button onClick={goBack} variant="subtle" size="lg" className="flex-1 py-4 text-base shadow-lg">
+        <Button onClick={goBack} variant="subtle" className="flex-1">
           Back
         </Button>
-        <Button onClick={goNext} size="lg" className="flex-1 py-4 text-base shadow-lg">
+        <Button onClick={goNext} className="flex-1">
           Continue
         </Button>
       </div>
@@ -388,10 +386,10 @@ export default function OnboardingGoalPage() {
       {error && <p className="text-red-400 text-sm text-center mb-4 bg-red-400/10 rounded-lg px-4 py-2">{error}</p>}
 
       <div className="flex items-center justify-center gap-3 w-full max-w-md mx-auto">
-        <Button onClick={goBack} variant="subtle" size="lg" className="flex-1 py-4 text-base shadow-lg">
+        <Button onClick={goBack} variant="subtle" className="flex-1">
           Back
         </Button>
-        <Button onClick={goNext} size="lg" className="flex-1 py-4 text-base shadow-lg">
+        <Button onClick={goNext} className="flex-1">
           Continue
         </Button>
       </div>
@@ -482,7 +480,7 @@ export default function OnboardingGoalPage() {
       {error && <p className="text-red-400 text-sm text-center mb-4 bg-red-400/10 rounded-lg px-4 py-2">{error}</p>}
 
       <div className="flex items-center justify-center gap-3 w-full max-w-md mx-auto">
-        <Button onClick={goBack} variant="subtle" size="lg" disabled={saving} className="flex-1 py-4 text-base shadow-lg">
+        <Button onClick={goBack} variant="subtle" disabled={saving} className="flex-1">
           Back
         </Button>
         {/* whitespace-nowrap, not just a shorter label: the saving label swaps in at a width the
@@ -491,8 +489,7 @@ export default function OnboardingGoalPage() {
         <Button
           onClick={handleFinish}
           disabled={saving}
-          size="lg"
-          className="flex-1 py-4 text-base shadow-lg whitespace-nowrap"
+          className="flex-1 whitespace-nowrap"
         >
           {saving ? 'Setting up…' : 'Start Voting'}
         </Button>

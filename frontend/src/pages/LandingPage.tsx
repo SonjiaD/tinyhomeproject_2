@@ -187,7 +187,7 @@ function SlideHero({ onNext }: { onNext: () => void }) {
           <p className="text-lg text-teal-200 mb-10 leading-relaxed">
             That decision is reversible. Here's the math on what reversing it looks like.
           </p>
-          <Button onClick={onNext} className="gap-2 px-7 py-3 shadow-lg shadow-teal-900/40">
+          <Button onClick={onNext} size="lg" className="gap-2 shadow-lg shadow-teal-900/40">
             See the numbers
             <svg viewBox="0 0 20 20" className="w-4 h-4" fill="currentColor">
               <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
@@ -492,7 +492,7 @@ function SlideCTA() {
             {/* One button: with Google, signing in and signing up are the same action, so
                 offering both split attention between two doors into the same place. */}
             <Link to="/login">
-              <Button size="lg" className="w-full px-8 py-4 text-lg shadow-xl shadow-teal-900/50">
+              <Button size="lg" className="w-full shadow-xl shadow-teal-900/50">
                 Get Started
               </Button>
             </Link>
