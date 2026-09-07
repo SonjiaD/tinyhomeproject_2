@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence, type Transition } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext'
 import { useParkingCount } from '../lib/useParkingCount'
@@ -516,6 +516,8 @@ const SLIDE_IS_DARK = [true, false, false, true, false, true]
 export default function LandingPage({ standalone = false }: { standalone?: boolean }) {
   const { user, loading } = useAuth()
   const navigate = useNavigate()
+  // Set by SiteNav's sign-out so the auto-redirect below stays out of the way.
+  const signedOut = Boolean((useLocation().state as { signedOut?: boolean } | null)?.signedOut)
   const [[current, direction], setCurrent] = useState([0, 0])
   const wheelLocked = useRef(false)
   const parkingCount = useParkingCount()
@@ -525,6 +527,9 @@ export default function LandingPage({ standalone = false }: { standalone?: boole
   // onboarding survey; everyone else goes to the map. Query the goal directly rather
   // than relying on the async-loading AuthContext profile to avoid a misroute race.
   useEffect(() => {
+    // A sign-out that just navigated here still has a session for a moment. Without this the
+    // redirect below would fire on that stale user and send them back into the app.
+    if (signedOut) return
     if (standalone || loading || !user) return
     let cancelled = false
     ;(async () => {
@@ -534,7 +539,7 @@ export default function LandingPage({ standalone = false }: { standalone?: boole
       navigate(prof?.goal ? '/parking-vote' : '/onboarding/goal', { replace: true })
     })()
     return () => { cancelled = true }
-  }, [standalone, user, loading, navigate])
+  }, [standalone, user, loading, navigate, signedOut])
 
   const go = useCallback((next: number, dir?: number) => {
     if (next < 0 || next >= SLIDE_COUNT) return

@@ -60,8 +60,16 @@ export function SiteNav({ variant = 'solid', isDark = true }: SiteNavProps) {
   }
 
   async function handleSignOut() {
+    // Leave the protected route BEFORE clearing the session. Signing out first would flip
+    // `user` to null while still on a guarded page, and AuthGuard would immediately render
+    // <Navigate to="/login"> — racing the navigate below, so logging out sometimes landed on
+    // the login screen instead of the intro.
+    //
+    // The flag tells LandingPage not to run its "you're signed in, go to the map" redirect:
+    // for a moment we are on `/` with a session that is still being torn down, and without it
+    // that effect would bounce the visitor straight back into the app they just left.
+    navigate('/', { replace: true, state: { signedOut: true } })
     await signOut()
-    navigate('/')
   }
 
   // The overlay sits on top of a slide that may be light or dark, so every colour has to be

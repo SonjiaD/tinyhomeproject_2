@@ -1,18 +1,25 @@
 import { type ButtonHTMLAttributes, type ReactNode } from 'react'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'subtle'
   size?: 'sm' | 'md' | 'lg'
   loading?: boolean
   children: ReactNode
 }
 
-const base = 'inline-flex items-center justify-center font-semibold rounded-full transition-all duration-200 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed'
+// rounded-lg, not rounded-full. Pill buttons made the marketing, auth and onboarding pages
+// read as a different product from the map UI, which already used gentle corners. Circles
+// (icon buttons, progress dots) and chips keep their own radius; those are different shapes,
+// not different opinions about the same shape.
+const base = 'inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed'
 
 const variants = {
   primary:   'bg-teal-500 hover:bg-teal-400 text-white shadow-sm',
   secondary: 'border-2 border-teal-500 text-teal-600 hover:bg-teal-50',
   ghost:     'text-teal-600 hover:text-teal-500 hover:bg-teal-50',
+  // For dark or photographic backgrounds, where the teal fill would dominate: the landing
+  // slideshow's secondary CTA and similar.
+  subtle:    'bg-white/10 hover:bg-white/20 border border-white/30 text-white backdrop-blur-sm',
 }
 
 const sizes = {
