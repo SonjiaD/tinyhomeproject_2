@@ -71,12 +71,12 @@ export default function AboutPage() {
           </p>
           <ul className="space-y-2 text-sm text-gray-600 mb-4">
             {[
-              'Residential Parking Permit Zones — polygon zones for blocks requiring residential permits',
-              'On-Street Parking Inventory — curb segments with regulations (meters, time limits)',
-              'Off-Street Parking Facilities — public pay and permit garages and lots',
-              'Parking Meters — all city-managed IPS parking meters',
-              'Jack London On-Street Parking — curb availability for the Jack London district',
-              'International Blvd BRT Parking — curb inventory near the International Blvd corridor',
+              'Residential Parking Permit Zones: polygon zones for blocks requiring residential permits',
+              'On-Street Parking Inventory: curb segments with regulations (meters, time limits)',
+              'Off-Street Parking Facilities: public pay and permit garages and lots',
+              'Parking Meters: all city-managed IPS parking meters',
+              'Jack London On-Street Parking: curb availability for the Jack London district',
+              'International Blvd BRT Parking: curb inventory near the International Blvd corridor',
             ].map(item => (
               <li key={item} className="flex items-start gap-2">
                 <span className="text-teal-500 mt-0.5 shrink-0">&ndash;</span>
@@ -87,9 +87,9 @@ export default function AboutPage() {
           <p className="text-gray-600 leading-relaxed mb-3">Supplemental sources:</p>
           <ul className="space-y-2 text-sm text-gray-600">
             {[
-              'SpotAngels — scraped real-time parking rules to identify overnight-free and holiday parking',
-              'OpenStreetMap via Overpass Turbo — East Oakland parking lanes and streetside parking nodes',
-              'SpotHero — supplemental parking inventory',
+              'SpotAngels: scraped real-time parking rules to identify overnight-free and holiday parking',
+              'OpenStreetMap via Overpass Turbo: East Oakland parking lanes and streetside parking nodes',
+              'SpotHero: supplemental parking inventory',
             ].map(item => (
               <li key={item} className="flex items-start gap-2">
                 <span className="text-teal-500 mt-0.5 shrink-0">&ndash;</span>

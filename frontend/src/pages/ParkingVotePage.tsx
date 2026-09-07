@@ -1552,7 +1552,7 @@ export default function ParkingVotePage() {
               pathOptions={{ color: '#6b7280', weight: 1.5, fillOpacity: 0, dashArray: '4 4', interactive: false }}
             >
               <Tooltip permanent direction="center" className="!bg-transparent !border-0 !shadow-none !text-gray-500 !text-[10px] !font-medium">
-                Piedmont — separate city
+                Piedmont: separate city
               </Tooltip>
             </Polygon>
           )}

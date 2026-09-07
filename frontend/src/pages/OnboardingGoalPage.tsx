@@ -281,7 +281,7 @@ export default function OnboardingGoalPage() {
           Which Oakland neighborhood do you most want to see this happen in?
         </h1>
         <p className="text-teal-300 leading-relaxed">
-          Tell us where you'd most like to see tiny home parklets — where you live, work, or see the biggest need.
+          Tell us where you'd most like to see tiny home parklets, where you live, work, or see the biggest need.
         </p>
       </div>
 
@@ -345,7 +345,7 @@ export default function OnboardingGoalPage() {
           onClick={() => { setNeighborhood('not-oakland'); goNext() }}
           className="text-teal-300/50 hover:text-teal-300 text-sm transition-colors"
         >
-          I don't live in Oakland — Skip
+          I don't live in Oakland. Skip
         </button>
         <button onClick={goBack} className="text-teal-400/40 hover:text-teal-400 text-sm transition-colors">
           ← Back
@@ -491,7 +491,7 @@ export default function OnboardingGoalPage() {
           A little about you
         </h1>
         <p className="text-teal-300 leading-relaxed">
-          This helps researchers understand who supports tiny home parklets. All optional — answer only what you're comfortable sharing.
+          This helps researchers understand who supports tiny home parklets. All optional, answer only what you're comfortable sharing.
         </p>
       </div>
 

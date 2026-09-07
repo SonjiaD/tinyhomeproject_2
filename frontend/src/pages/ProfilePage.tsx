@@ -432,7 +432,7 @@ export default function ProfilePage() {
         {/* About You (demographics) */}
         <section className="mb-10">
           <SectionLabel className="mb-1">About You</SectionLabel>
-          <p className="text-gray-400 text-sm mb-4">Optional — helps researchers understand who supports tiny home parklets.</p>
+          <p className="text-gray-400 text-sm mb-4">Optional: helps researchers understand who supports tiny home parklets.</p>
 
           <div className="flex flex-col gap-6">
             <div>
