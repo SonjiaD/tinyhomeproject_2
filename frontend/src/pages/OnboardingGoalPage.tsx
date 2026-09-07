@@ -241,42 +241,49 @@ export default function OnboardingGoalPage() {
         </p>
       </div>
 
-      {/* 124 options: a searchable dropdown, not a wall of chips. */}
-      <SearchableSelect
-        options={NEIGHBORHOODS}
-        value={neighborhood === NOT_OAKLAND ? '' : neighborhood}
-        onChange={setNeighborhood}
-        placeholder="Search neighborhoods…"
-        variant="dark"
-        disabled={neighborhood === NOT_OAKLAND}
-      />
-
-      {/* Deliberately outside the dropdown. Someone who lives elsewhere should not have to
-          search a list of Oakland neighbourhoods to say they are not in Oakland. The two are
-          mutually exclusive, so each clears the other. */}
-      <label className="mt-4 mb-6 flex items-center gap-3 cursor-pointer group w-fit">
-        <input
-          type="checkbox"
-          checked={neighborhood === NOT_OAKLAND}
-          onChange={e => setNeighborhood(e.target.checked ? NOT_OAKLAND : '')}
-          className="w-4 h-4 accent-teal-500 cursor-pointer"
+      {/* 124 options, in a permanently open list at a fixed height. This step has nothing else on
+          it, so a panel that springs open on click shoves the checkbox and both buttons down the
+          page — the jump reads as a glitch. The column is narrower than the heading above it so
+          the step sits as a centred block rather than a full-width bar. */}
+      <div className="w-full max-w-md mx-auto">
+        <SearchableSelect
+          options={NEIGHBORHOODS}
+          value={neighborhood === NOT_OAKLAND ? '' : neighborhood}
+          onChange={setNeighborhood}
+          placeholder="Search neighborhoods…"
+          variant="dark"
+          mode="inline"
+          disabled={neighborhood === NOT_OAKLAND}
         />
-        <span className="text-sm text-teal-200/70 group-hover:text-teal-200 transition-colors">
-          I don't live in Oakland
-        </span>
-      </label>
-      <div className="flex items-center justify-center gap-3 w-full max-w-md mx-auto">
-        <Button onClick={goBack} variant="subtle" size="lg" className="flex-1 py-4 text-base shadow-lg">
-          Back
-        </Button>
-        <Button
-          onClick={goNext}
-          disabled={!neighborhood}
-          size="lg"
-          className="flex-1 py-4 text-base shadow-lg"
-        >
-          Continue
-        </Button>
+
+        {/* Deliberately outside the list. Someone who lives elsewhere should not have to
+            search a list of Oakland neighbourhoods to say they are not in Oakland. The two are
+            mutually exclusive, so each clears the other. */}
+        <label className="mt-4 mb-6 flex items-center gap-3 cursor-pointer group w-fit">
+          <input
+            type="checkbox"
+            checked={neighborhood === NOT_OAKLAND}
+            onChange={e => setNeighborhood(e.target.checked ? NOT_OAKLAND : '')}
+            className="w-4 h-4 accent-teal-500 cursor-pointer"
+          />
+          <span className="text-sm text-teal-200/70 group-hover:text-teal-200 transition-colors">
+            I don't live in Oakland
+          </span>
+        </label>
+
+        <div className="flex items-center justify-center gap-3">
+          <Button onClick={goBack} variant="subtle" size="lg" className="flex-1 py-4 text-base shadow-lg">
+            Back
+          </Button>
+          <Button
+            onClick={goNext}
+            disabled={!neighborhood}
+            size="lg"
+            className="flex-1 py-4 text-base shadow-lg"
+          >
+            Continue
+          </Button>
+        </div>
       </div>
     </div>,
 
@@ -478,13 +485,16 @@ export default function OnboardingGoalPage() {
         <Button onClick={goBack} variant="subtle" size="lg" disabled={saving} className="flex-1 py-4 text-base shadow-lg">
           Back
         </Button>
+        {/* whitespace-nowrap, not just a shorter label: the saving label swaps in at a width the
+            button cannot grow to accommodate (flex-1 inside max-w-md), so without this any future
+            wording change silently wraps it to two lines and the whole row jumps taller. */}
         <Button
           onClick={handleFinish}
           disabled={saving}
           size="lg"
-          className="flex-1 py-4 text-base shadow-lg"
+          className="flex-1 py-4 text-base shadow-lg whitespace-nowrap"
         >
-          {saving ? 'Setting up your map…' : 'Start Voting'}
+          {saving ? 'Setting up…' : 'Start Voting'}
         </Button>
       </div>
     </div>,
