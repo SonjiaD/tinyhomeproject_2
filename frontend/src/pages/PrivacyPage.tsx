@@ -94,9 +94,22 @@ export default function PrivacyPage() {
             they do not reveal who voted, and your name and email are never attached to them.
           </p>
           <p className="text-gray-600 leading-relaxed mb-4">
-            <strong>Your individual votes, notes and profile answers are private.</strong> The
+            <strong>Notes you attach to a vote are shown to other people using the map,
+            without your name.</strong> The note text and whether it supported or opposed the
+            spot are visible; who wrote it is not. Your name, email and user account are never
+            sent to anyone else's browser, and notes are shown with only the month they were
+            written, not an exact time. Because the note itself is free text, please avoid
+            putting anything identifying in it.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-4">
+            You can edit a note at any time from the map, and the change is what others will
+            see. A note belongs to a vote, so removing your vote removes the note with it.
+          </p>
+          <p className="text-gray-600 leading-relaxed mb-4">
+            <strong>Your individual vote records and profile answers stay private.</strong> The
             database enforces this directly: you can only read and change your own rows. Other
-            signed-in users cannot query them.
+            signed-in users cannot query which spots you personally voted on, or what you
+            answered during onboarding.
           </p>
           <p className="text-gray-600 leading-relaxed">
             Researchers on the project can access the full dataset for analysis. Anything

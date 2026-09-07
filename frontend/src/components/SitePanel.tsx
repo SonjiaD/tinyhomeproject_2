@@ -1,8 +1,43 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { formatDistance, normalize } from '../lib/normalization'
-import { submitVote, deleteVote } from '../lib/api'
+import { submitVote, deleteVote, fetchSiteNotes } from '../lib/api'
+import type { SiteNote } from '../lib/api'
 import type { VoteSite, VoteTally } from '../lib/types'
 import type { DistanceBounds } from '../lib/normalization'
+
+/**
+ * Renders the deliberately coarse note date. The view truncates to the month precisely so an
+ * anonymous note cannot be pinned to a day, so this must not reach for anything finer.
+ */
+function formatNoteMonth(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const now = new Date()
+  if (d.getUTCFullYear() === now.getUTCFullYear() && d.getUTCMonth() === now.getUTCMonth()) {
+    return 'this month'
+  }
+  return d.toLocaleDateString(undefined, { month: 'long', year: 'numeric', timeZone: 'UTC' })
+}
+
+/** One anonymous note. No author is rendered because none is fetched. */
+function NoteRow({ note }: { note: SiteNote }) {
+  return (
+    <li className="py-3 border-b border-gray-100 last:border-b-0">
+      <div className="flex items-center justify-between mb-1">
+        <span className={`text-xs font-semibold ${note.support ? 'text-green-700' : 'text-red-600'}`}>
+          {note.support ? '▲ Support' : '▼ Oppose'}
+        </span>
+        <span className="text-[11px] text-gray-400">{formatNoteMonth(note.posted_month)}</span>
+      </div>
+      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">
+        {note.comment}
+      </p>
+    </li>
+  )
+}
+
+/** Notes shown before the list collapses behind "Show N more". */
+const VISIBLE_NOTES = 3
 
 interface AmenityBarProps {
   label: string
@@ -49,6 +84,11 @@ export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, on
   const [noteSaved, setNoteSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [svError, setSvError] = useState(false)
+  const [notes, setNotes] = useState<SiteNote[]>([])
+  const [notesLoading, setNotesLoading] = useState(false)
+  const [showAllNotes, setShowAllNotes] = useState(false)
+  /** The stance a pending flip would switch to, while we ask what to do with the note. */
+  const [pendingFlip, setPendingFlip] = useState<boolean | null>(null)
 
   const isOpen = site !== null
   const commentDirty = comment.trim() !== (savedComment ?? '').trim()
@@ -104,6 +144,19 @@ export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, on
       if (commentDirty) await handleSaveNote()
       return
     }
+    // Notes are public now, so carrying one across a flip would republish an argument under
+    // the stance it argues against — "great transit access" filed under Oppose. Ask first.
+    // Flipping with nothing written keeps its one-tap behaviour.
+    if (myVote !== undefined && comment.trim()) {
+      setPendingFlip(support)
+      return
+    }
+    await commitVote(support, comment.trim())
+  }
+
+  async function commitVote(support: boolean, noteText: string) {
+    if (!site) return
+    setPendingFlip(null)
     setSubmitting(true)
     setError(null)
     const prev = myVote
@@ -114,11 +167,11 @@ export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, on
 
     onVoteSubmitted(site.id, newTally, support)
     try {
-      // Always send the textarea's current contents — it is prefilled with the saved note,
-      // so flipping a vote carries the note across instead of nulling it.
-      const text = comment.trim()
-      await submitVote(site.id, support, text)
-      onCommentSaved?.(site.id, text)
+      // noteText is decided by the caller: the textarea's contents normally, or '' when the
+      // flip prompt was answered with Clear.
+      await submitVote(site.id, support, noteText)
+      setComment(noteText)
+      onCommentSaved?.(site.id, noteText)
     } catch {
       setError('Failed to save your vote. Please try again.')
       if (prev !== undefined) {
@@ -131,6 +184,22 @@ export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, on
     }
   }
 
+  // Other people's notes for the open site. Fetched per site rather than in bulk, and cleared
+  // first so a previous site's notes never render under a new address during the request.
+  useEffect(() => {
+    const siteId = site?.id
+    if (!siteId) return
+    let cancelled = false
+    setNotes([])
+    setShowAllNotes(false)
+    setNotesLoading(true)
+    fetchSiteNotes(siteId)
+      .then(rows => { if (!cancelled) setNotes(rows) })
+      .catch(() => { if (!cancelled) setNotes([]) })
+      .finally(() => { if (!cancelled) setNotesLoading(false) })
+    return () => { cancelled = true }
+  }, [site?.id])
+
   // Reset error/street-view when switching sites, and prefill the textarea with the note
   // already saved for the newly selected site so it can be read and edited.
   const [lastSiteId, setLastSiteId] = useState<string | null>(null)
@@ -142,6 +211,7 @@ export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, on
     setError(null)
     setSvError(false)
     setNoteSaved(false)
+    setPendingFlip(null)
   } else if (site && (savedComment ?? '') !== lastSaved) {
     // Notes hydrate from the server after mount, so a site selected during that window
     // starts blank. Adopt the value when it lands — but only if the user hasn't typed,
@@ -243,6 +313,43 @@ export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, on
                 </div>
               )}
 
+              {pendingFlip !== null ? (
+                /* Flipping with a note attached. Inline rather than a modal so the note being
+                   discussed stays on screen while the choice is made. */
+                <div className="mb-3 rounded-md border border-amber-300 bg-amber-50 p-3">
+                  <p className="text-xs text-amber-900 leading-relaxed mb-2">
+                    You wrote a note {myVote ? 'supporting' : 'opposing'} this spot. It will be
+                    shown publicly under your new answer.
+                  </p>
+                  <p className="text-sm text-gray-700 italic border-l-2 border-amber-300 pl-2 mb-3 break-words">
+                    {comment.trim()}
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => commitVote(pendingFlip, comment.trim())}
+                      disabled={submitting}
+                      className="flex-1 rounded-md bg-teal-500 text-white text-sm font-medium py-2
+                        hover:bg-teal-400 transition-colors disabled:opacity-50"
+                    >
+                      Keep note
+                    </button>
+                    <button
+                      onClick={() => commitVote(pendingFlip, '')}
+                      disabled={submitting}
+                      className="flex-1 rounded-md border border-gray-300 text-gray-700 text-sm font-medium py-2
+                        hover:bg-gray-50 transition-colors disabled:opacity-50"
+                    >
+                      Clear it
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setPendingFlip(null)}
+                    className="w-full text-xs text-gray-500 hover:text-gray-700 mt-2 underline underline-offset-2"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
               <div className="flex gap-2 mb-3">
                 <button
                   onClick={() => handleVote(true)}
@@ -265,13 +372,14 @@ export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, on
                   {myVote === false ? '✗ Opposed' : 'Oppose'}
                 </button>
               </div>
+              )}
 
               {/* Note editor. A note lives on the vote row (votes.support is NOT NULL), so
                   it can only be saved once a vote exists. */}
               <div className="mt-4">
                 <div className="flex items-baseline justify-between mb-1.5">
                   <label htmlFor="site-note" className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                    Your note
+                    Your note <span className="text-teal-600">· Public</span>
                   </label>
                   <span className="text-[11px] text-gray-400">{comment.length}/500</span>
                 </div>
@@ -279,7 +387,7 @@ export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, on
                   id="site-note"
                   value={comment}
                   onChange={e => { setComment(e.target.value); setNoteSaved(false) }}
-                  placeholder={myVote === undefined ? 'Vote first, then add a note…' : 'Why this spot? (optional)'}
+                  placeholder={myVote === undefined ? 'Vote first, then add a note…' : 'Why this spot? Everyone on the map can read this.'}
                   rows={3}
                   maxLength={500}
                   disabled={myVote === undefined}
@@ -287,6 +395,11 @@ export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, on
                     placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-400
                     focus:border-transparent resize-none disabled:bg-gray-50 disabled:text-gray-400"
                 />
+
+                <p className="text-[11px] text-gray-500 mt-1.5 leading-relaxed">
+                  Shown to others without your name. Please don't include personal details like
+                  your address.
+                </p>
 
                 {myVote === undefined ? (
                   <p className="text-xs text-gray-400 mt-2">
@@ -322,6 +435,46 @@ export function SitePanel({ site, allBounds, voteTally, myVote, savedComment, on
                     Remove my vote
                   </button>
                 </div>
+              )}
+            </div>
+
+            {/* Everyone else's notes. Your own is deliberately absent: the view excludes the
+                caller's row, so it appears once, in the editor above, where it is editable. */}
+            <div className="border-t border-gray-100 pt-4">
+              <div className="flex items-baseline justify-between mb-1">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Community Notes
+                </p>
+                {notes.length > 0 && (
+                  <span className="text-[11px] text-gray-400">{notes.length}</span>
+                )}
+              </div>
+
+              {notesLoading ? (
+                <p className="text-xs text-gray-400 py-2">Loading notes…</p>
+              ) : notes.length === 0 ? (
+                <p className="text-xs text-gray-400 py-2 leading-relaxed">
+                  No notes yet — be the first to say why this spot works, or doesn't.
+                </p>
+              ) : (
+                <>
+                  <p className="text-[11px] text-gray-400 mb-1">Shown without names.</p>
+                  <ul>
+                    {(showAllNotes ? notes : notes.slice(0, VISIBLE_NOTES)).map((note, i) => (
+                      <NoteRow key={i} note={note} />
+                    ))}
+                  </ul>
+                  {notes.length > VISIBLE_NOTES && (
+                    <button
+                      onClick={() => setShowAllNotes(v => !v)}
+                      className="w-full text-xs text-teal-600 hover:text-teal-500 font-medium mt-2 py-1"
+                    >
+                      {showAllNotes
+                        ? 'Show fewer'
+                        : `Show ${notes.length - VISIBLE_NOTES} more`}
+                    </button>
+                  )}
+                </>
               )}
             </div>
           </div>

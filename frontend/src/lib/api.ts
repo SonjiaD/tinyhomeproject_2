@@ -64,9 +64,20 @@ export const BATCH_CHUNK = 500
 /** Longest note we store, mirroring the votes_comment_len CHECK constraint. */
 const MAX_COMMENT = 500
 
+/** Most notes shown for one site. Well past what any site is expected to attract. */
+const MAX_NOTES_PER_SITE = 50
+
 export interface MyVotes {
   votes: Record<string, boolean>
   comments: Record<string, string>
+}
+
+/** One anonymous note on a site, as returned by site_vote_notes. Carries no author field. */
+export interface SiteNote {
+  support: boolean
+  comment: string
+  /** Start of the month the note was last edited, ISO. Deliberately not a precise timestamp. */
+  posted_month: string
 }
 
 export interface SuggestionPin {
@@ -185,6 +196,32 @@ export async function fetchMyVotes(): Promise<MyVotes> {
     if (row.comment) comments[row.site_id] = row.comment
   }
   return { votes, comments }
+}
+
+/**
+ * Everyone else's notes on one site, without names.
+ *
+ * Read per site when the panel opens rather than in bulk: there are 46,970 sites, and only the
+ * open one is ever displayed.
+ *
+ * site_vote_notes projects no user_id and no row id at all, so identity never reaches the
+ * browser to be accidentally rendered or logged. The view also excludes the caller's own note,
+ * which is why nothing here has to filter it out — your note lives in your editor, and it
+ * cannot also appear in this list.
+ *
+ * posted_month is truncated to the month server-side, so ordering by it leaves notes within a
+ * single month in no particular order. That is the accepted cost of not publishing a timestamp
+ * precise enough to tie an anonymous note back to a person.
+ */
+export async function fetchSiteNotes(siteId: string): Promise<SiteNote[]> {
+  const { data, error } = await supabase
+    .from('site_vote_notes')
+    .select('support, comment, posted_month')
+    .eq('site_id', siteId)
+    .order('posted_month', { ascending: false })
+    .limit(MAX_NOTES_PER_SITE)
+  if (error) throw error
+  return (data ?? []) as SiteNote[]
 }
 
 /** Public suggestion pins. Replaces GET /api/suggestions. */
