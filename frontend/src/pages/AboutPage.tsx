@@ -25,7 +25,10 @@ export default function AboutPage() {
         </div>
       </div>
 
-      <PageLayout maxWidth="lg" className="flex-1">
+      {/* No flex-1: the footer's mt-auto already pins it to the bottom on short pages, and
+          sizing this box by flex distribution rather than by its content is what let the
+          content overflow past the footer. */}
+      <PageLayout maxWidth="lg">
         <div className="space-y-6">
         <AboutSection label="The Problem">
           <p className="text-gray-600 leading-relaxed">
