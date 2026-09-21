@@ -5,11 +5,18 @@ const STORAGE_KEY = 'parkletExplainerCollapsed_v1'
 
 // Requested by Adam Garrett-Clark's feedback: the tool layers several unfamiliar ideas at
 // once (tiny homes, parking-as-housing, siting-by-map), so the concept needs to stay visible
-// while people use the tool, not just on the intro slides they may have skipped past. This
-// renders in AppShell (frontend/src/App.tsx) alongside NavBar, so it's mounted on every
-// authenticated page — but see the route check below, which hides it where it's redundant
-// (the slides already explain the concept) or where there's no room for it.
-const HIDDEN_ROUTES = ['/', '/login', '/signup', '/onboarding/goal', '/intro']
+// while people use the tool — "no matter what page you are on," not just on the intro slides
+// they may have skipped past. This renders in AppShell (frontend/src/App.tsx) alongside
+// NavBar, so it's mounted on every route by default.
+//
+// /login and /signup are the one deliberate exception, and it's a layout collision, not a
+// judgement call about redundancy: LoginPage's left panel is `justify-end`, i.e. its own hero
+// text ("Every parking space you vote on is a data point...") is pinned to this exact
+// bottom-left corner on purpose. Every other route — including the onboarding survey, which
+// already carries its own top-right reminder — was checked for a similar conflict and has
+// none, so the widget shows there too even though a reminder already exists; the two don't
+// overlap and Adam's ask was unconditional.
+const HIDDEN_ROUTES = ['/login', '/signup']
 
 export function ParkletExplainer() {
   const location = useLocation()
