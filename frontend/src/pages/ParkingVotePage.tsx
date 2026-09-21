@@ -18,6 +18,13 @@ import {
 } from '../lib/api'
 const MIN_ZOOM = 14
 
+// Leaflet's permanent Tooltip renders at a fixed pixel size regardless of zoom. Piedmont's
+// outline is only ~2.5 km across, so below this zoom it shrinks to a few dozen screen pixels
+// while the label stays full size, spilling out into empty space with nothing visibly
+// anchoring it. 12 is roughly where the outline is ~150px wide — big enough to hold the text.
+// The outline itself stays visible at every zoom; only the label is gated.
+const PIEDMONT_LABEL_MIN_ZOOM = 12
+
 type DrawMode = 'none' | 'rectangle' | 'circle' | 'paint' | 'polygon'
 
 type NeighborhoodGeometry =
@@ -1544,9 +1551,11 @@ export default function ParkingVotePage() {
               positions={piedmontRing}
               pathOptions={{ color: '#6b7280', weight: 1.5, fillOpacity: 0, dashArray: '4 4', interactive: false }}
             >
-              <Tooltip permanent direction="center" className="!bg-transparent !border-0 !shadow-none !text-gray-500 !text-[10px] !font-medium">
-                Piedmont: separate city
-              </Tooltip>
+              {zoom >= PIEDMONT_LABEL_MIN_ZOOM && (
+                <Tooltip permanent direction="center" className="!bg-transparent !border-0 !shadow-none !text-gray-500 !text-[10px] !font-medium">
+                  Piedmont: separate city
+                </Tooltip>
+              )}
             </Polygon>
           )}
 
